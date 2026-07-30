@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PT Exercise Tracker - Disc Golf Recovery</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1>🥏 Disc Golf PT Tracker</h1>
+                <div class="theme-selector">
+                    <button class="theme-btn" data-theme="light" title="Light mode">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="5"></circle>
+                            <line x1="12" y1="1" x2="12" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="23"></line>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                            <line x1="1" y1="12" x2="3" y2="12"></line>
+                            <line x1="21" y1="12" x2="23" y2="12"></line>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                        </svg>
+                    </button>
+                    <button class="theme-btn" data-theme="dark" title="Dark mode">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                    </button>
+                    <button class="theme-btn" data-theme="system" title="System theme">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                            <line x1="8" y1="21" x2="16" y2="21"></line>
+                            <line x1="12" y1="17" x2="12" y2="21"></line>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="countdown">
+                <span class="countdown-label">Target: First week of September</span>
+                <span class="countdown-timer" id="countdown">6 weeks remaining</span>
+            </div>
+            
+            <div class="streak-indicator" id="streak-indicator">
+                <span class="streak-fire" id="streak-fire">🔥</span>
+                <span class="streak-count" id="streak-count">0</span>
+                <span class="streak-label">day streak</span>
+            </div>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab active" data-tab="daily">Daily Log</button>
+            <button class="tab" data-tab="exercises">Manage Exercises</button>
+            <button class="tab" data-tab="calendar">Calendar</button>
+            <button class="tab" data-tab="progress">Progress</button>
+            <button class="tab" data-tab="settings">Settings</button>
+        </nav>
+
+        <main>
+            <!-- Daily Log Tab -->
+            <section id="daily-tab" class="tab-content active">
+                <div class="date-selector">
+                    <label for="log-date">Date:</label>
+                    <input type="date" id="log-date">
+                </div>
+
+                <div class="exercise-list" id="daily-exercises">
+                    <!-- Exercises will be populated here -->
+                </div>
+
+                <button class="btn btn-primary" id="save-day">Save Day's Progress</button>
+            </section>
+
+            <!-- Manage Exercises Tab -->
+            <section id="exercises-tab" class="tab-content">
+                <h2>Current Exercises</h2>
+                <div class="exercise-list" id="manage-exercises">
+                    <!-- Exercise management will be populated here -->
+                </div>
+
+                <button class="btn btn-secondary" id="add-exercise">Add New Exercise</button>
+            </section>
+
+            <!-- Calendar Tab -->
+            <section id="calendar-tab" class="tab-content">
+                <h2>Exercise Calendar</h2>
+                <div class="calendar-controls">
+                    <button class="btn btn-secondary" id="prev-month">&lt; Previous</button>
+                    <span class="calendar-month" id="calendar-month-label">July 2026</span>
+                    <button class="btn btn-secondary" id="next-month">Next &gt;</button>
+                </div>
+                <div class="calendar-grid" id="calendar-grid">
+                    <!-- Calendar will be populated here -->
+                </div>
+            </section>
+
+            <!-- Progress Tab -->
+            <section id="progress-tab" class="tab-content">
+                <h2>Overall Progress</h2>
+                <div class="progress-summary">
+                    <div class="stat-card">
+                        <h3>Total Days Completed</h3>
+                        <p class="stat-value" id="total-days">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Current Streak</h3>
+                        <p class="stat-value" id="current-streak">0 days</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Completion Rate</h3>
+                        <p class="stat-value" id="completion-rate">0%</p>
+                    </div>
+                </div>
+                
+                <h3>Weekly Goals</h3>
+                <div class="weekly-goals">
+                    <div class="goal-item">
+                        <div class="goal-header">
+                            <span class="goal-label">Weekly Exercise Target</span>
+                            <span class="goal-progress" id="weekly-progress">0/7 days</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="weekly-progress-bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="goal-item">
+                        <div class="goal-header">
+                            <span class="goal-label">Weekly Completion Rate Goal</span>
+                            <span class="goal-progress" id="weekly-rate-progress">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="weekly-rate-bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Weekly Progress</h3>
+                <div class="weekly-chart">
+                    <canvas id="completionChart"></canvas>
+                </div>
+                
+                <h3>Pain Trends</h3>
+                <div class="weekly-chart">
+                    <canvas id="painChart"></canvas>
+                </div>
+                
+                <h3>Difficulty Trends</h3>
+                <div class="weekly-chart">
+                    <canvas id="difficultyChart"></canvas>
+                </div>
+
+                <h3>Exercise History</h3>
+                <div class="history-list" id="exercise-history">
+                    <!-- Exercise history will be populated here -->
+                </div>
+                
+                <h3>Achievement Badges</h3>
+                <div class="badges-container" id="badges-container">
+                    <!-- Badges will be populated here -->
+                </div>
+            </section>
+
+            <!-- Settings Tab -->
+            <section id="settings-tab" class="tab-content">
+                <h2>Settings</h2>
+                
+                <div class="settings-section">
+                    <h3>Reminders</h3>
+                    <div class="setting-item">
+                        <label for="reminder-time">Daily Reminder Time:</label>
+                        <input type="time" id="reminder-time" value="09:00">
+                        <button class="btn btn-primary" id="enable-reminders">Enable Reminders</button>
+                        <button class="btn btn-danger" id="disable-reminders" style="display: none;">Disable Reminders</button>
+                    </div>
+                    <p class="setting-description">Get browser notifications to remind you to do your exercises</p>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>Data Management</h3>
+                    <div class="setting-item">
+                        <button class="btn btn-secondary" id="export-data">Export Data</button>
+                        <button class="btn btn-secondary" id="import-data">Import Data</button>
+                        <input type="file" id="import-file" accept=".json" style="display: none;">
+                    </div>
+                    <p class="setting-description">Export your data to backup or import from a previous backup</p>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>Danger Zone</h3>
+                    <div class="setting-item">
+                        <button class="btn btn-danger" id="clear-all-data">Clear All Data</button>
+                    </div>
+                    <p class="setting-description">Permanently delete all your exercise data (cannot be undone)</p>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>Return-to-Play Milestones</h3>
+                    <div class="milestone-list" id="milestone-list">
+                        <!-- Milestones will be populated here -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Exercise Modal -->
+    <div id="exercise-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modal-title">Add Exercise</h2>
+            <form id="exercise-form">
+                <div class="form-group">
+                    <label for="exercise-name">Exercise Name:</label>
+                    <input type="text" id="exercise-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="exercise-description">Description/How-to:</label>
+                    <textarea id="exercise-description" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="exercise-reps">Prescribed Reps:</label>
+                    <input type="number" id="exercise-reps" placeholder="e.g., 20">
+                </div>
+                <div class="form-group">
+                    <label for="exercise-hold">Hold Time:</label>
+                    <input type="text" id="exercise-hold" placeholder="e.g., 3-5 seconds">
+                </div>
+                <div class="form-group">
+                    <label for="exercise-frequency">Daily Frequency:</label>
+                    <input type="text" id="exercise-frequency" placeholder="e.g., 2-3 times per day">
+                </div>
+                <div class="form-group">
+                    <label for="exercise-weight">Ankle Weight (optional):</label>
+                    <input type="text" id="exercise-weight" placeholder="e.g., 3-5 lbs">
+                </div>
+                <button type="submit" class="btn btn-primary">Save Exercise</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
