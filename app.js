@@ -12,7 +12,13 @@ const defaultExercises = [
         reps: "",
         hold: "",
         frequency: "",
-        weight: ""
+        weight: "",
+        metadata: {
+            created: "2026-07-30",
+            modified: "2026-07-30",
+            version: 1,
+            isActive: true
+        }
     },
     {
         id: 2,
@@ -21,7 +27,13 @@ const defaultExercises = [
         reps: "",
         hold: "",
         frequency: "",
-        weight: ""
+        weight: "",
+        metadata: {
+            created: "2026-07-30",
+            modified: "2026-07-30",
+            version: 1,
+            isActive: true
+        }
     },
     {
         id: 3,
@@ -30,7 +42,13 @@ const defaultExercises = [
         reps: "",
         hold: "",
         frequency: "",
-        weight: ""
+        weight: "",
+        metadata: {
+            created: "2026-07-30",
+            modified: "2026-07-30",
+            version: 1,
+            isActive: true
+        }
     },
     {
         id: 4,
@@ -39,7 +57,13 @@ const defaultExercises = [
         reps: 20,
         hold: "3-5 seconds",
         frequency: "1-2 times a day",
-        weight: "3-5 lbs (optional)"
+        weight: "3-5 lbs (optional)",
+        metadata: {
+            created: "2026-07-30",
+            modified: "2026-07-30",
+            version: 1,
+            isActive: true
+        }
     },
     {
         id: 5,
@@ -48,7 +72,13 @@ const defaultExercises = [
         reps: 20,
         hold: "3 seconds",
         frequency: "2-3 times per day",
-        weight: ""
+        weight: "",
+        metadata: {
+            created: "2026-07-30",
+            modified: "2026-07-30",
+            version: 1,
+            isActive: true
+        }
     },
     {
         id: 6,
@@ -57,7 +87,13 @@ const defaultExercises = [
         reps: 20,
         hold: "3 seconds",
         frequency: "2-3 times per day",
-        weight: ""
+        weight: "",
+        metadata: {
+            created: "2026-07-30",
+            modified: "2026-07-30",
+            version: 1,
+            isActive: true
+        }
     },
     {
         id: 7,
@@ -66,7 +102,13 @@ const defaultExercises = [
         reps: 20,
         hold: "1 second",
         frequency: "2-3 times per day",
-        weight: ""
+        weight: "",
+        metadata: {
+            created: "2026-07-30",
+            modified: "2026-07-30",
+            version: 1,
+            isActive: true
+        }
     }
 ];
 
@@ -112,6 +154,219 @@ const achievementBadges = [
 ];
 
 let unlockedBadges = [];
+let pendingExerciseUpdates = null;
+
+// Exercise update detection system
+function checkForExerciseUpdates() {
+    const updates = {
+        newExercises: [],
+        modifiedExercises: [],
+        removedExercises: [],
+        unchangedExercises: []
+    };
+
+    // Check for new or modified exercises
+    defaultExercises.forEach(defaultExercise => {
+        const existingExercise = exercises.find(ex => ex.id === defaultExercise.id);
+
+        if (!existingExercise) {
+            // New exercise
+            updates.newExercises.push(defaultExercise);
+        } else {
+            // Check if modified
+            const isModified = (
+                existingExercise.name !== defaultExercise.name ||
+                existingExercise.description !== defaultExercise.description ||
+                existingExercise.reps !== defaultExercise.reps ||
+                existingExercise.hold !== defaultExercise.hold ||
+                existingExercise.frequency !== defaultExercise.frequency ||
+                existingExercise.weight !== defaultExercise.weight
+            );
+
+            if (isModified) {
+                updates.modifiedExercises.push({
+                    existing: existingExercise,
+                    updated: defaultExercise
+                });
+            } else {
+                updates.unchangedExercises.push(existingExercise);
+            }
+        }
+    });
+
+    // Check for removed exercises
+    exercises.forEach(existingExercise => {
+        const stillInDefault = defaultExercises.find(def => def.id === existingExercise.id);
+        if (!stillInDefault && existingExercise.metadata?.isActive !== false) {
+            updates.removedExercises.push(existingExercise);
+        }
+    });
+
+    // If there are updates, store them and show confirmation dialog
+    if (updates.newExercises.length > 0 || updates.modifiedExercises.length > 0 || updates.removedExercises.length > 0) {
+        pendingExerciseUpdates = updates;
+        showExerciseUpdateDialog(updates);
+    }
+}
+
+function showExerciseUpdateDialog(updates) {
+    const dialog = document.createElement('div');
+    dialog.className = 'exercise-update-dialog';
+    dialog.innerHTML = `
+        <div class="update-dialog-content">
+            <h2>Exercise Plan Updated</h2>
+            <p>Your PT has updated your exercise plan:</p>
+
+            ${updates.newExercises.length > 0 ? `
+            <div class="update-section">
+                <h3>New Exercises:</h3>
+                <ul>
+                    ${updates.newExercises.map(ex => `<li>${ex.name}</li>`).join('')}
+                </ul>
+            </div>
+            ` : ''}
+
+            ${updates.modifiedExercises.length > 0 ? `
+            <div class="update-section">
+                <h3>Modified Exercises:</h3>
+                <ul>
+                    ${updates.modifiedExercises.map(mod => `
+                        <li>${mod.existing.name}
+                            ${mod.existing.reps !== mod.updated.reps ? ` (${mod.existing.reps} → ${mod.updated.reps} reps)` : ''}
+                            ${mod.existing.hold !== mod.updated.hold ? ` (hold: ${mod.existing.hold} → ${mod.updated.hold})` : ''}
+                            ${mod.existing.frequency !== mod.updated.frequency ? ` (frequency: ${mod.existing.frequency} → ${mod.updated.frequency})` : ''}
+                        </li>
+                    `).join('')}
+                </ul>
+            </div>
+            ` : ''}
+
+            ${updates.removedExercises.length > 0 ? `
+            <div class="update-section">
+                <h3>Archived Exercises:</h3>
+                <ul>
+                    ${updates.removedExercises.map(ex => `<li>${ex.name}</li>`).join('')}
+                </ul>
+            </div>
+            ` : ''}
+
+            <p class="update-note">Your historical data will be preserved.</p>
+
+            <div class="update-dialog-buttons">
+                <button class="btn btn-primary" id="apply-updates">Apply Changes</button>
+                <button class="btn btn-secondary" id="review-details">Review Details</button>
+                <button class="btn btn-secondary" id="dismiss-updates">Dismiss</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(dialog);
+
+    document.getElementById('apply-updates').addEventListener('click', () => {
+        applyExerciseUpdates(updates);
+        document.body.removeChild(dialog);
+    });
+
+    document.getElementById('review-details').addEventListener('click', () => {
+        showDetailedUpdateInfo(updates);
+    });
+
+    document.getElementById('dismiss-updates').addEventListener('click', () => {
+        document.body.removeChild(dialog);
+        pendingExerciseUpdates = null;
+    });
+}
+
+function showDetailedUpdateInfo(updates) {
+    let details = "Exercise Update Details:\n\n";
+
+    if (updates.newExercises.length > 0) {
+        details += "NEW EXERCISES:\n";
+        updates.newExercises.forEach(ex => {
+            details += `\n${ex.name}\n`;
+            details += `  Description: ${ex.description.substring(0, 100)}...\n`;
+            details += `  Reps: ${ex.reps || 'N/A'}\n`;
+            details += `  Hold: ${ex.hold || 'N/A'}\n`;
+            details += `  Frequency: ${ex.frequency || 'N/A'}\n`;
+        });
+    }
+
+    if (updates.modifiedExercises.length > 0) {
+        details += "\n\nMODIFIED EXERCISES:\n";
+        updates.modifiedExercises.forEach(mod => {
+            details += `\n${mod.existing.name}\n`;
+            details += `  Reps: ${mod.existing.reps || 'N/A'} → ${mod.updated.reps || 'N/A'}\n`;
+            details += `  Hold: ${mod.existing.hold || 'N/A'} → ${mod.updated.hold || 'N/A'}\n`;
+            details += `  Frequency: ${mod.existing.frequency || 'N/A'} → ${mod.updated.frequency || 'N/A'}\n`;
+            details += `  Weight: ${mod.existing.weight || 'N/A'} → ${mod.updated.weight || 'N/A'}\n`;
+        });
+    }
+
+    if (updates.removedExercises.length > 0) {
+        details += "\n\nARCHIVED EXERCISES:\n";
+        updates.removedExercises.forEach(ex => {
+            details += `\n${ex.name}\n`;
+            details += `  Will be archived but historical data preserved\n`;
+        });
+    }
+
+    alert(details);
+}
+
+function applyExerciseUpdates(updates) {
+    const today = new Date().toISOString().split('T')[0];
+
+    // Add new exercises
+    updates.newExercises.forEach(newExercise => {
+        const exerciseWithMetadata = {
+            ...newExercise,
+            metadata: {
+                ...newExercise.metadata,
+                created: today,
+                modified: today
+            }
+        };
+        exercises.push(exerciseWithMetadata);
+    });
+
+    // Update modified exercises
+    updates.modifiedExercises.forEach(mod => {
+        const existingIndex = exercises.findIndex(ex => ex.id === mod.existing.id);
+        if (existingIndex !== -1) {
+            exercises[existingIndex] = {
+                ...mod.updated,
+                metadata: {
+                    ...mod.updated.metadata,
+                    created: mod.existing.metadata?.created || today,
+                    modified: today,
+                    version: (mod.existing.metadata?.version || 1) + 1
+                }
+            };
+        }
+    });
+
+    // Archive removed exercises (soft delete)
+    updates.removedExercises.forEach(removedExercise => {
+        const existingIndex = exercises.findIndex(ex => ex.id === removedExercise.id);
+        if (existingIndex !== -1) {
+            exercises[existingIndex].metadata = {
+                ...exercises[existingIndex].metadata,
+                isActive: false,
+                archived: today
+            };
+        }
+    });
+
+    // Save updated exercises
+    saveExercises();
+
+    // Refresh UI
+    renderDailyExercises();
+    renderManageExercises();
+
+    alert('Exercise updates applied successfully!');
+    pendingExerciseUpdates = null;
+}
 
 function initializeApp() {
     // Load data from localStorage
@@ -138,25 +393,27 @@ function loadData() {
     const storedLogs = localStorage.getItem('ptDailyLogs');
     const storedMilestones = localStorage.getItem('ptMilestones');
     const storedBadges = localStorage.getItem('unlockedBadges');
-    
+
     if (storedExercises) {
         exercises = JSON.parse(storedExercises);
+        // Check for exercise updates from default
+        checkForExerciseUpdates();
     } else {
         exercises = [...defaultExercises];
         saveExercises();
     }
-    
+
     if (storedLogs) {
         dailyLogs = JSON.parse(storedLogs);
     }
-    
+
     if (storedMilestones) {
         milestones = JSON.parse(storedMilestones);
     } else {
         milestones = [...defaultMilestones];
         saveMilestones();
     }
-    
+
     if (storedBadges) {
         unlockedBadges = JSON.parse(storedBadges);
     }
@@ -282,12 +539,15 @@ function renderDailyExercises() {
         sessionName = customName || 'custom';
     }
 
-    if (exercises.length === 0) {
-        container.innerHTML = '<p>No exercises added yet. Go to "Manage Exercises" to add some.</p>';
+    // Filter out inactive exercises for daily view
+    const activeExercises = exercises.filter(ex => ex.metadata?.isActive !== false);
+
+    if (activeExercises.length === 0) {
+        container.innerHTML = '<p>No active exercises. Go to "Manage Exercises" to add or activate exercises.</p>';
         return;
     }
 
-    container.innerHTML = exercises.map(exercise => {
+    container.innerHTML = activeExercises.map(exercise => {
         const logData = dailyLogs[selectedDate]?.sessions?.[sessionName]?.[exercise.id] || {};
         
         return `
@@ -372,31 +632,85 @@ function renderDailyExercises() {
 
 function renderManageExercises() {
     const container = document.getElementById('manage-exercises');
-    
+
     if (exercises.length === 0) {
         container.innerHTML = '<p>No exercises added yet. Click "Add New Exercise" to get started.</p>';
         return;
     }
-    
-    container.innerHTML = exercises.map(exercise => `
-        <div class="exercise-card" data-exercise-id="${exercise.id}">
-            <div class="exercise-header">
-                <h3 class="exercise-title">${exercise.name}</h3>
-                <div>
-                    <button class="btn btn-edit" onclick="editExercise(${exercise.id})">Edit</button>
-                    <button class="btn btn-danger" onclick="deleteExercise(${exercise.id})">Delete</button>
+
+    const activeExercises = exercises.filter(ex => ex.metadata?.isActive !== false);
+    const archivedExercises = exercises.filter(ex => ex.metadata?.isActive === false);
+
+    let html = '';
+
+    if (activeExercises.length > 0) {
+        html += '<h3>Active Exercises</h3>';
+        html += activeExercises.map(exercise => `
+            <div class="exercise-card" data-exercise-id="${exercise.id}">
+                <div class="exercise-header">
+                    <h3 class="exercise-title">${exercise.name}</h3>
+                    <div>
+                        <button class="btn btn-edit" onclick="editExercise(${exercise.id})">Edit</button>
+                        <button class="btn btn-danger" onclick="archiveExercise(${exercise.id})">Archive</button>
+                    </div>
+                </div>
+                <p class="exercise-description">${exercise.description}</p>
+
+                <div class="exercise-details">
+                    ${exercise.reps ? `<span class="detail-item"><span class="detail-label">Reps:</span> ${exercise.reps}</span>` : ''}
+                    ${exercise.hold ? `<span class="detail-item"><span class="detail-label">Hold:</span> ${exercise.hold}</span>` : ''}
+                    ${exercise.frequency ? `<span class="detail-item"><span class="detail-label">Frequency:</span> ${exercise.frequency}</span>` : ''}
+                    ${exercise.weight ? `<span class="detail-item"><span class="detail-label">Weight:</span> ${exercise.weight}</span>` : ''}
                 </div>
             </div>
-            <p class="exercise-description">${exercise.description}</p>
-            
-            <div class="exercise-details">
-                ${exercise.reps ? `<span class="detail-item"><span class="detail-label">Reps:</span> ${exercise.reps}</span>` : ''}
-                ${exercise.hold ? `<span class="detail-item"><span class="detail-label">Hold:</span> ${exercise.hold}</span>` : ''}
-                ${exercise.frequency ? `<span class="detail-item"><span class="detail-label">Frequency:</span> ${exercise.frequency}</span>` : ''}
-                ${exercise.weight ? `<span class="detail-item"><span class="detail-label">Weight:</span> ${exercise.weight}</span>` : ''}
+        `).join('');
+    }
+
+    if (archivedExercises.length > 0) {
+        html += '<h3>Archived Exercises</h3>';
+        html += archivedExercises.map(exercise => `
+            <div class="exercise-card archived" data-exercise-id="${exercise.id}">
+                <div class="exercise-header">
+                    <h3 class="exercise-title">${exercise.name} (Archived)</h3>
+                    <div>
+                        <button class="btn btn-edit" onclick="restoreExercise(${exercise.id})">Restore</button>
+                    </div>
+                </div>
+                <p class="exercise-description">${exercise.description}</p>
+                <p class="archive-date">Archived: ${exercise.metadata?.archived || 'Unknown'}</p>
             </div>
-        </div>
-    `).join('');
+        `).join('');
+    }
+
+    container.innerHTML = html;
+}
+
+function archiveExercise(exerciseId) {
+    const exercise = exercises.find(ex => ex.id === exerciseId);
+    if (exercise) {
+        exercise.metadata = {
+            ...exercise.metadata,
+            isActive: false,
+            archived: new Date().toISOString().split('T')[0]
+        };
+        saveExercises();
+        renderManageExercises();
+        renderDailyExercises();
+    }
+}
+
+function restoreExercise(exerciseId) {
+    const exercise = exercises.find(ex => ex.id === exerciseId);
+    if (exercise) {
+        exercise.metadata = {
+            ...exercise.metadata,
+            isActive: true,
+            archived: null
+        };
+        saveExercises();
+        renderManageExercises();
+        renderDailyExercises();
+    }
 }
 
 function saveDayProgress() {
@@ -449,7 +763,17 @@ function saveDayProgress() {
             pain: pain ? parseInt(pain) : null,
             difficulty: difficulty ? parseInt(difficulty) : null,
             notes,
-            timestamp
+            timestamp,
+            exerciseSnapshot: {
+                id: exercise.id,
+                name: exercise.name,
+                description: exercise.description,
+                reps: exercise.reps,
+                hold: exercise.hold,
+                frequency: exercise.frequency,
+                weight: exercise.weight,
+                version: exercise.metadata?.version || 1
+            }
         };
     });
 
@@ -569,19 +893,34 @@ function updateProgress() {
 
 function renderHistory(dates) {
     const container = document.getElementById('exercise-history');
-    
+
     if (dates.length === 0) {
         container.innerHTML = '<p>No exercise history yet. Start logging your daily exercises!</p>';
         return;
     }
-    
+
     // Show last 7 days
     const recentDates = dates.slice(-7).reverse();
-    
+
     container.innerHTML = recentDates.map(date => {
         const dayLog = dailyLogs[date];
-        const totalExercises = Object.keys(dayLog).length;
-        const completedExercises = Object.values(dayLog).filter(log => log.completed).length;
+        let totalExercises = 0;
+        let completedExercises = 0;
+
+        // Handle new session-based structure
+        if (dayLog.sessions) {
+            Object.values(dayLog.sessions).forEach(session => {
+                Object.values(session).forEach(log => {
+                    totalExercises++;
+                    if (log.completed) completedExercises++;
+                });
+            });
+        } else {
+            // Old data structure for backward compatibility
+            totalExercises = Object.keys(dayLog).length;
+            completedExercises = Object.values(dayLog).filter(log => log.completed).length;
+        }
+
         const completionRate = totalExercises > 0 ? Math.round((completedExercises / totalExercises) * 100) : 0;
         
         const formattedDate = new Date(date).toLocaleDateString('en-US', {
@@ -636,11 +975,18 @@ function editExercise(id) {
 }
 
 function deleteExercise(id) {
-    if (confirm('Are you sure you want to delete this exercise?')) {
-        exercises = exercises.filter(ex => ex.id !== id);
-        saveExercises();
-        renderManageExercises();
-        renderDailyExercises();
+    if (confirm('Are you sure you want to delete this exercise? This will archive it and preserve all historical data.')) {
+        const exercise = exercises.find(ex => ex.id === id);
+        if (exercise) {
+            exercise.metadata = {
+                ...exercise.metadata,
+                isActive: false,
+                archived: new Date().toISOString().split('T')[0]
+            };
+            saveExercises();
+            renderManageExercises();
+            renderDailyExercises();
+        }
     }
 }
 
