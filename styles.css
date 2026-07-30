@@ -808,190 +808,393 @@ header h1 {
 }
 
 /* Mobile optimization for smaller screens */
-@media (max-width: 480px) {
+@media (max-width: 600px) {
     body {
-        padding: 10px;
+        padding: 5px;
+    }
+
+    .container {
+        border-radius: 8px;
     }
 
     header {
-        padding: 20px 15px;
+        padding: 15px 10px;
     }
 
     header h1 {
-        font-size: 1.4em;
+        font-size: 1.3em;
+        margin-bottom: 5px;
     }
 
     .header-content {
-        gap: 10px;
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+
+    .theme-selector {
+        padding: 6px;
+        gap: 6px;
+    }
+
+    .theme-btn {
+        width: 32px;
+        height: 32px;
+    }
+
+    .theme-btn svg {
+        width: 16px;
+        height: 16px;
     }
 
     .countdown {
-        margin-top: 10px;
-        padding: 8px 16px;
-    }
-
-    .countdown-label {
-        font-size: 0.75em;
-    }
-
-    .countdown-timer {
-        font-size: 1.1em;
-    }
-
-    .streak-indicator {
         margin-top: 8px;
         padding: 6px 12px;
     }
 
+    .countdown-label {
+        font-size: 0.7em;
+        margin-bottom: 3px;
+    }
+
+    .countdown-timer {
+        font-size: 1em;
+    }
+
+    .streak-indicator {
+        margin-top: 5px;
+        padding: 4px 10px;
+    }
+
     .streak-fire {
-        font-size: 1.2em;
+        font-size: 1em;
     }
 
     .streak-count {
-        font-size: 1.1em;
+        font-size: 1em;
     }
 
     .streak-label {
-        font-size: 0.8em;
+        font-size: 0.75em;
     }
 
     .tab {
-        padding: 12px 8px;
-        font-size: 0.8em;
+        padding: 10px 6px;
+        font-size: 0.75em;
     }
 
     .tab-content {
-        padding: 15px;
-    }
-
-    .date-selector {
-        margin-bottom: 15px;
         padding: 12px;
     }
 
+    .date-selector {
+        margin-bottom: 12px;
+        padding: 10px;
+    }
+
+    .date-selector label {
+        font-size: 0.9em;
+    }
+
+    .date-selector input {
+        padding: 8px 12px;
+        font-size: 0.9em;
+    }
+
     .exercise-card {
-        padding: 15px;
-        margin-bottom: 15px;
+        padding: 12px;
+        margin-bottom: 12px;
+    }
+
+    .exercise-header {
+        margin-bottom: 10px;
     }
 
     .exercise-title {
-        font-size: 1.1em;
+        font-size: 1em;
     }
 
     .exercise-description {
-        font-size: 0.9em;
-        margin-bottom: 10px;
-    }
-
-    .tracking-section {
-        padding: 10px;
-        margin-top: 10px;
-    }
-
-    .tracking-row {
-        gap: 10px;
-        margin-bottom: 10px;
-    }
-
-    .detail-item {
-        padding: 6px 10px;
         font-size: 0.85em;
+        margin-bottom: 8px;
+        line-height: 1.5;
     }
 
-    h2 {
-        font-size: 1.4em;
-        margin-bottom: 15px;
-    }
-
-    h3 {
-        font-size: 1.2em;
-        margin-bottom: 12px;
-    }
-
-    .progress-summary {
-        gap: 10px;
-        margin-bottom: 15px;
-    }
-
-    .stat-card {
-        padding: 15px;
-    }
-
-    .stat-card h3 {
-        font-size: 0.9em;
+    .exercise-details {
+        gap: 8px;
         margin-bottom: 8px;
     }
 
-    .stat-value {
-        font-size: 1.8em;
-    }
-
-    .weekly-goals {
-        padding: 15px;
-        margin-bottom: 15px;
-    }
-
-    .goal-item {
-        margin-bottom: 15px;
-    }
-
-    .btn {
-        padding: 10px 16px;
-        font-size: 0.9em;
-    }
-
-    .calendar-controls {
-        gap: 8px;
-        margin-bottom: 15px;
-    }
-
-    .calendar-month {
-        font-size: 1.1em;
-    }
-
-    .calendar-day {
-        font-size: 0.9em;
-    }
-
-    .settings-section {
-        padding: 15px;
-        margin-bottom: 15px;
-    }
-
-    .setting-item {
-        gap: 10px;
-        margin-bottom: 12px;
-    }
-
-    .modal-content {
-        padding: 20px;
-        width: 95%;
-        margin: 5% auto;
-    }
-
-    .form-group {
-        margin-bottom: 15px;
-    }
-
-    .badges-container {
-        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-        gap: 10px;
-    }
-
-    .badge {
-        padding: 10px;
-    }
-
-    .badge-icon {
-        font-size: 1.8em;
-    }
-
-    .badge-name {
+    .detail-item {
+        padding: 4px 8px;
         font-size: 0.8em;
     }
 
+    .tracking-section {
+        padding: 8px;
+        margin-top: 8px;
+    }
+
+    .tracking-row {
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+
+    .tracking-group {
+        min-width: 120px;
+    }
+
+    .tracking-group label {
+        font-size: 0.85em;
+        margin-bottom: 4px;
+    }
+
+    .tracking-group input,
+    .tracking-group select,
+    .tracking-group textarea {
+        padding: 8px 10px;
+        font-size: 0.85em;
+    }
+
+    .completion-checkbox {
+        margin-bottom: 10px;
+        gap: 8px;
+    }
+
+    .completion-checkbox input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+    }
+
+    .completion-checkbox label {
+        font-size: 0.9em;
+    }
+
+    .exercise-timer {
+        padding: 8px;
+        margin-bottom: 10px;
+    }
+
+    .timer-btn {
+        padding: 6px 12px;
+        font-size: 0.85em;
+    }
+
+    .timer-display {
+        font-size: 1em;
+        min-width: 50px;
+    }
+
+    h2 {
+        font-size: 1.3em;
+        margin-bottom: 12px;
+    }
+
+    h3 {
+        font-size: 1.1em;
+        margin-bottom: 10px;
+    }
+
+    .progress-summary {
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+    .stat-card {
+        padding: 12px;
+    }
+
+    .stat-card h3 {
+        font-size: 0.85em;
+        margin-bottom: 6px;
+    }
+
+    .stat-value {
+        font-size: 1.5em;
+    }
+
+    .weekly-goals {
+        padding: 12px;
+        margin-bottom: 12px;
+    }
+
+    .goal-item {
+        margin-bottom: 12px;
+    }
+
+    .goal-header {
+        margin-bottom: 8px;
+    }
+
+    .goal-label {
+        font-size: 0.9em;
+    }
+
+    .goal-progress {
+        font-size: 0.9em;
+    }
+
+    .progress-bar {
+        height: 8px;
+    }
+
+    .weekly-chart {
+        padding: 12px;
+        margin-bottom: 12px;
+        min-height: 200px;
+    }
+
+    .weekly-chart canvas {
+        max-height: 180px;
+    }
+
+    .btn {
+        padding: 8px 14px;
+        font-size: 0.85em;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        padding: 10px 18px;
+    }
+
+    .calendar-controls {
+        gap: 6px;
+        margin-bottom: 12px;
+    }
+
+    .calendar-month {
+        font-size: 1em;
+    }
+
+    .calendar-grid {
+        gap: 4px;
+        margin-bottom: 15px;
+    }
+
+    .calendar-day-header {
+        padding: 6px;
+        font-size: 0.8em;
+    }
+
+    .calendar-day {
+        border-radius: 6px;
+    }
+
+    .calendar-day-number {
+        font-size: 0.9em;
+    }
+
+    .calendar-day-indicator {
+        font-size: 0.6em;
+    }
+
+    .history-item {
+        padding: 10px;
+        gap: 8px;
+    }
+
+    .history-date {
+        font-size: 0.9em;
+    }
+
+    .history-exercises {
+        font-size: 0.85em;
+    }
+
+    .settings-section {
+        padding: 12px;
+        margin-bottom: 12px;
+    }
+
+    .settings-section h3 {
+        font-size: 1em;
+        margin-bottom: 10px;
+    }
+
+    .setting-item {
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+
+    .setting-item label {
+        font-size: 0.9em;
+    }
+
+    .setting-item input[type="time"] {
+        padding: 8px 12px;
+        font-size: 0.9em;
+    }
+
+    .setting-description {
+        font-size: 0.8em;
+        margin-top: 6px;
+    }
+
+    .milestone-item {
+        padding: 8px;
+        gap: 8px;
+    }
+
+    .milestone-checkbox {
+        width: 18px;
+        height: 18px;
+    }
+
+    .milestone-text {
+        font-size: 0.9em;
+    }
+
+    .milestone-icon {
+        font-size: 1em;
+    }
+
+    .badges-container {
+        grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+        gap: 8px;
+    }
+
+    .badge {
+        padding: 8px;
+    }
+
+    .badge-icon {
+        font-size: 1.5em;
+        margin-bottom: 4px;
+    }
+
+    .badge-name {
+        font-size: 0.75em;
+    }
+
     .badge-description {
-        font-size: 0.7em;
+        font-size: 0.65em;
+    }
+
+    .modal-content {
+        padding: 15px;
+        width: 95%;
+        margin: 3% auto;
+        border-radius: 12px;
+    }
+
+    .modal-content h2 {
+        font-size: 1.2em;
+        margin-bottom: 15px;
+    }
+
+    .form-group {
+        margin-bottom: 12px;
+    }
+
+    .form-group label {
+        font-size: 0.9em;
+        margin-bottom: 6px;
+    }
+
+    .form-group input,
+    .form-group textarea {
+        padding: 10px;
+        font-size: 0.9em;
     }
 }
 
