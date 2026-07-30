@@ -807,6 +807,194 @@ header h1 {
     }
 }
 
+/* Mobile optimization for smaller screens */
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+
+    header {
+        padding: 20px 15px;
+    }
+
+    header h1 {
+        font-size: 1.4em;
+    }
+
+    .header-content {
+        gap: 10px;
+    }
+
+    .countdown {
+        margin-top: 10px;
+        padding: 8px 16px;
+    }
+
+    .countdown-label {
+        font-size: 0.75em;
+    }
+
+    .countdown-timer {
+        font-size: 1.1em;
+    }
+
+    .streak-indicator {
+        margin-top: 8px;
+        padding: 6px 12px;
+    }
+
+    .streak-fire {
+        font-size: 1.2em;
+    }
+
+    .streak-count {
+        font-size: 1.1em;
+    }
+
+    .streak-label {
+        font-size: 0.8em;
+    }
+
+    .tab {
+        padding: 12px 8px;
+        font-size: 0.8em;
+    }
+
+    .tab-content {
+        padding: 15px;
+    }
+
+    .date-selector {
+        margin-bottom: 15px;
+        padding: 12px;
+    }
+
+    .exercise-card {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+    .exercise-title {
+        font-size: 1.1em;
+    }
+
+    .exercise-description {
+        font-size: 0.9em;
+        margin-bottom: 10px;
+    }
+
+    .tracking-section {
+        padding: 10px;
+        margin-top: 10px;
+    }
+
+    .tracking-row {
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .detail-item {
+        padding: 6px 10px;
+        font-size: 0.85em;
+    }
+
+    h2 {
+        font-size: 1.4em;
+        margin-bottom: 15px;
+    }
+
+    h3 {
+        font-size: 1.2em;
+        margin-bottom: 12px;
+    }
+
+    .progress-summary {
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .stat-card {
+        padding: 15px;
+    }
+
+    .stat-card h3 {
+        font-size: 0.9em;
+        margin-bottom: 8px;
+    }
+
+    .stat-value {
+        font-size: 1.8em;
+    }
+
+    .weekly-goals {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+    .goal-item {
+        margin-bottom: 15px;
+    }
+
+    .btn {
+        padding: 10px 16px;
+        font-size: 0.9em;
+    }
+
+    .calendar-controls {
+        gap: 8px;
+        margin-bottom: 15px;
+    }
+
+    .calendar-month {
+        font-size: 1.1em;
+    }
+
+    .calendar-day {
+        font-size: 0.9em;
+    }
+
+    .settings-section {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+    .setting-item {
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+
+    .modal-content {
+        padding: 20px;
+        width: 95%;
+        margin: 5% auto;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .badges-container {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+        gap: 10px;
+    }
+
+    .badge {
+        padding: 10px;
+    }
+
+    .badge-icon {
+        font-size: 1.8em;
+    }
+
+    .badge-name {
+        font-size: 0.8em;
+    }
+
+    .badge-description {
+        font-size: 0.7em;
+    }
+}
+
 /* Additional polish */
 h2, h3 {
     color: var(--text-primary);
