@@ -188,7 +188,13 @@ function setupEventListeners() {
     
     // Date change
     document.getElementById('log-date').addEventListener('change', renderDailyExercises);
-    
+
+    // Session type change
+    document.getElementById('session-type').addEventListener('change', function() {
+        const customInput = document.getElementById('custom-session-name');
+        customInput.style.display = this.value === 'custom' ? 'block' : 'none';
+    });
+
     // Save day's progress
     document.getElementById('save-day').addEventListener('click', saveDayProgress);
     
@@ -268,14 +274,21 @@ function switchTab(tabName) {
 function renderDailyExercises() {
     const container = document.getElementById('daily-exercises');
     const selectedDate = document.getElementById('log-date').value;
-    
+    const sessionType = document.getElementById('session-type').value;
+    let sessionName = sessionType;
+
+    if (sessionType === 'custom') {
+        const customName = document.getElementById('custom-session-name').value.trim();
+        sessionName = customName || 'custom';
+    }
+
     if (exercises.length === 0) {
         container.innerHTML = '<p>No exercises added yet. Go to "Manage Exercises" to add some.</p>';
         return;
     }
-    
+
     container.innerHTML = exercises.map(exercise => {
-        const logData = dailyLogs[selectedDate]?.[exercise.id] || {};
+        const logData = dailyLogs[selectedDate]?.sessions?.[sessionName]?.[exercise.id] || {};
         
         return `
             <div class="exercise-card" data-exercise-id="${exercise.id}">
@@ -290,7 +303,25 @@ function renderDailyExercises() {
                     ${exercise.frequency ? `<span class="detail-item"><span class="detail-label">Frequency:</span> ${exercise.frequency}</span>` : ''}
                     ${exercise.weight ? `<span class="detail-item"><span class="detail-label">Weight:</span> ${exercise.weight}</span>` : ''}
                 </div>
-                
+
+                ${dailyLogs[selectedDate]?.sessions ? `
+                <div class="session-history">
+                    <h4>Today's Sessions:</h4>
+                    ${Object.entries(dailyLogs[selectedDate].sessions).map(([sessionName, sessionData]) => {
+                        const exerciseData = sessionData[exercise.id];
+                        if (!exerciseData) return '';
+                        return `
+                        <div class="session-item">
+                            <span class="session-name">${sessionName}</span>
+                            <span class="session-status">${exerciseData.completed ? '✅' : '⏳'}</span>
+                            ${exerciseData.reps ? `<span class="session-reps">${exerciseData.reps} reps</span>` : ''}
+                            ${exerciseData.timestamp ? `<span class="session-time">${new Date(exerciseData.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>` : ''}
+                        </div>
+                        `;
+                    }).join('')}
+                </div>
+                ` : ''}
+
                 <div class="tracking-section">
                     ${exercise.hold ? `
                     <div class="exercise-timer">
@@ -370,16 +401,39 @@ function renderManageExercises() {
 
 function saveDayProgress() {
     const selectedDate = document.getElementById('log-date').value;
-    
+    const sessionType = document.getElementById('session-type').value;
+    let sessionName = sessionType;
+
+    if (sessionType === 'custom') {
+        const customName = document.getElementById('custom-session-name').value.trim();
+        if (!customName) {
+            alert('Please enter a custom session name');
+            return;
+        }
+        sessionName = customName;
+    }
+
     if (!selectedDate) {
         alert('Please select a date');
         return;
     }
-    
+
     if (!dailyLogs[selectedDate]) {
-        dailyLogs[selectedDate] = {};
+        dailyLogs[selectedDate] = {
+            sessions: {}
+        };
     }
-    
+
+    if (!dailyLogs[selectedDate].sessions) {
+        dailyLogs[selectedDate].sessions = {};
+    }
+
+    if (!dailyLogs[selectedDate].sessions[sessionName]) {
+        dailyLogs[selectedDate].sessions[sessionName] = {};
+    }
+
+    const timestamp = new Date().toISOString();
+
     exercises.forEach(exercise => {
         const completed = document.getElementById(`completed-${exercise.id}`).checked;
         const reps = document.getElementById(`reps-${exercise.id}`).value;
@@ -387,47 +441,71 @@ function saveDayProgress() {
         const pain = document.getElementById(`pain-${exercise.id}`).value;
         const difficulty = document.getElementById(`difficulty-${exercise.id}`).value;
         const notes = document.getElementById(`notes-${exercise.id}`).value;
-        
-        dailyLogs[selectedDate][exercise.id] = {
+
+        dailyLogs[selectedDate].sessions[sessionName][exercise.id] = {
             completed,
             reps: reps ? parseInt(reps) : null,
             weight: weight ? parseFloat(weight) : null,
             pain: pain ? parseInt(pain) : null,
             difficulty: difficulty ? parseInt(difficulty) : null,
-            notes
+            notes,
+            timestamp
         };
     });
-    
+
     saveDailyLogs();
-    alert('Progress saved successfully!');
+    alert(`Progress saved for ${sessionName} session!`);
     updateProgress();
 }
 
 function updateProgress() {
     const dates = Object.keys(dailyLogs).sort();
-    
-    // Total days completed
-    const totalDays = dates.length;
+
+    // Total days completed (days with at least one session)
+    const totalDays = dates.filter(date => {
+        const dayLog = dailyLogs[date];
+        if (dayLog.sessions && Object.keys(dayLog.sessions).length > 0) {
+            return true;
+        }
+        // Support old data structure for backward compatibility
+        if (!dayLog.sessions && Object.keys(dayLog).length > 0) {
+            return true;
+        }
+        return false;
+    }).length;
+
     document.getElementById('total-days').textContent = totalDays;
-    
+
     // Current streak calculation
     let currentStreak = 0;
     const today = new Date().toISOString().split('T')[0];
-    
+
     for (let i = dates.length - 1; i >= 0; i--) {
         const date = dates[i];
         const dayLog = dailyLogs[date];
-        const exercisesCompleted = Object.values(dayLog).filter(log => log.completed).length;
-        
+        let exercisesCompleted = 0;
+
+        // Check new session-based structure
+        if (dayLog.sessions) {
+            Object.values(dayLog.sessions).forEach(session => {
+                Object.values(session).forEach(exerciseData => {
+                    if (exerciseData.completed) exercisesCompleted++;
+                });
+            });
+        } else {
+            // Support old data structure
+            exercisesCompleted = Object.values(dayLog).filter(log => log.completed).length;
+        }
+
         if (exercisesCompleted > 0) {
             currentStreak++;
         } else {
             break;
         }
     }
-    
+
     document.getElementById('current-streak').textContent = `${currentStreak} days`;
-    
+
     // Update streak indicator in header
     const streakFire = document.getElementById('streak-fire');
     const streakCount = document.getElementById('streak-count');
@@ -449,17 +527,30 @@ function updateProgress() {
     // Completion rate
     let totalPossible = 0;
     let totalCompleted = 0;
-    
+
     dates.forEach(date => {
         const dayLog = dailyLogs[date];
-        Object.values(dayLog).forEach(log => {
-            totalPossible++;
-            if (log.completed) {
-                totalCompleted++;
-            }
-        });
+        if (dayLog.sessions) {
+            // New session-based structure
+            Object.values(dayLog.sessions).forEach(session => {
+                Object.values(session).forEach(log => {
+                    totalPossible++;
+                    if (log.completed) {
+                        totalCompleted++;
+                    }
+                });
+            });
+        } else {
+            // Old data structure for backward compatibility
+            Object.values(dayLog).forEach(log => {
+                totalPossible++;
+                if (log.completed) {
+                    totalCompleted++;
+                }
+            });
+        }
     });
-    
+
     const completionRate = totalPossible > 0 ? Math.round((totalCompleted / totalPossible) * 100) : 0;
     document.getElementById('completion-rate').textContent = `${completionRate}%`;
     
@@ -1346,9 +1437,23 @@ function renderCalendar() {
         }
         
         if (dayLog) {
-            const totalExercises = Object.keys(dayLog).length;
-            const completedExercises = Object.values(dayLog).filter(log => log.completed).length;
-            
+            let totalExercises = 0;
+            let completedExercises = 0;
+
+            if (dayLog.sessions) {
+                // New session-based structure
+                Object.values(dayLog.sessions).forEach(session => {
+                    Object.values(session).forEach(exerciseData => {
+                        totalExercises++;
+                        if (exerciseData.completed) completedExercises++;
+                    });
+                });
+            } else {
+                // Old data structure for backward compatibility
+                totalExercises = Object.keys(dayLog).length;
+                completedExercises = Object.values(dayLog).filter(log => log.completed).length;
+            }
+
             if (completedExercises === totalExercises && totalExercises > 0) {
                 dayClass += ' has-data';
                 indicator = '✓';

@@ -72,11 +72,22 @@
                     <input type="date" id="log-date">
                 </div>
 
+                <div class="session-selector">
+                    <label for="session-type">Session:</label>
+                    <select id="session-type">
+                        <option value="morning">Morning</option>
+                        <option value="afternoon">Afternoon</option>
+                        <option value="evening">Evening</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                    <input type="text" id="custom-session-name" placeholder="Session name" style="display: none;">
+                </div>
+
                 <div class="exercise-list" id="daily-exercises">
                     <!-- Exercises will be populated here -->
                 </div>
 
-                <button class="btn btn-primary" id="save-day">Save Day's Progress</button>
+                <button class="btn btn-primary" id="save-day">Save Session Progress</button>
             </section>
 
             <!-- Manage Exercises Tab -->

@@ -304,7 +304,7 @@ header h1 {
 }
 
 .date-selector {
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     padding: 20px;
     background: var(--bg-tertiary);
     border-radius: 12px;
@@ -328,6 +328,58 @@ header h1 {
 }
 
 .date-selector input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.session-selector {
+    margin-bottom: 20px;
+    padding: 20px;
+    background: var(--bg-tertiary);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.session-selector label {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.session-selector select {
+    padding: 10px 15px;
+    border: 2px solid var(--input-border);
+    border-radius: 8px;
+    font-size: 1em;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    min-width: 150px;
+}
+
+.session-selector select:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.session-selector input[type="text"] {
+    padding: 10px 15px;
+    border: 2px solid var(--input-border);
+    border-radius: 8px;
+    font-size: 1em;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    flex: 1;
+    min-width: 200px;
+}
+
+.session-selector input[type="text"]:focus {
     outline: none;
     border-color: var(--accent-primary);
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
@@ -394,6 +446,59 @@ header h1 {
 .detail-label {
     font-weight: 600;
     color: var(--accent-primary);
+}
+
+.session-history {
+    background: var(--bg-secondary);
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border: 1px solid var(--border-color);
+}
+
+.session-history h4 {
+    font-size: 0.9em;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.session-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px;
+    background: var(--bg-tertiary);
+    border-radius: 6px;
+    margin-bottom: 6px;
+    font-size: 0.85em;
+}
+
+.session-item:last-child {
+    margin-bottom: 0;
+}
+
+.session-name {
+    font-weight: 600;
+    color: var(--accent-primary);
+    min-width: 80px;
+}
+
+.session-status {
+    font-size: 1.1em;
+}
+
+.session-reps {
+    color: var(--text-secondary);
+    background: var(--bg-secondary);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.session-time {
+    color: var(--text-muted);
+    font-size: 0.8em;
+    margin-left: auto;
 }
 
 .tracking-section {
@@ -898,6 +1003,57 @@ header h1 {
     .date-selector input {
         padding: 8px 12px;
         font-size: 0.9em;
+    }
+
+    .session-selector {
+        margin-bottom: 12px;
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .session-selector label {
+        font-size: 0.9em;
+    }
+
+    .session-selector select {
+        padding: 8px 12px;
+        font-size: 0.9em;
+        min-width: 120px;
+    }
+
+    .session-selector input[type="text"] {
+        padding: 8px 12px;
+        font-size: 0.9em;
+        min-width: 150px;
+    }
+
+    .session-history {
+        padding: 8px;
+        margin-bottom: 10px;
+    }
+
+    .session-history h4 {
+        font-size: 0.8em;
+        margin-bottom: 6px;
+    }
+
+    .session-item {
+        padding: 4px 6px;
+        font-size: 0.75em;
+        gap: 6px;
+    }
+
+    .session-name {
+        min-width: 60px;
+        font-size: 0.8em;
+    }
+
+    .session-reps {
+        font-size: 0.75em;
+    }
+
+    .session-time {
+        font-size: 0.7em;
     }
 
     .exercise-card {
