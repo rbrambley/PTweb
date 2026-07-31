@@ -1892,3 +1892,42 @@ h3 {
     font-style: italic;
     margin-top: 10px;
 }
+
+/* Report Feature Styles */
+.report-action {
+    margin: 20px 0 30px;
+    text-align: left;
+}
+
+.report-modal-content {
+    max-width: 520px;
+}
+
+.report-options .checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.report-options .checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.report-options input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent-primary);
+    cursor: pointer;
+}
+
+@media (max-width: 600px) {
+    .report-action {
+        text-align: center;
+    }
+}

@@ -122,6 +122,10 @@
                     </div>
                 </div>
                 
+                <div class="report-action">
+                    <button class="btn btn-primary" id="generate-report">Generate Report</button>
+                </div>
+                
                 <h3>Weekly Goals</h3>
                 <div class="weekly-goals">
                     <div class="goal-item">
@@ -281,6 +285,45 @@
                     <input type="text" id="exercise-weight" placeholder="e.g., 3-5 lbs">
                 </div>
                 <button type="submit" class="btn btn-primary">Save Exercise</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Report Modal -->
+    <div id="report-modal" class="modal">
+        <div class="modal-content report-modal-content">
+            <span class="close">&times;</span>
+            <h2>Generate Exercise Report</h2>
+            <form id="report-form">
+                <div class="form-group">
+                    <label for="report-start-date">Start Date:</label>
+                    <input type="date" id="report-start-date">
+                </div>
+                <div class="form-group">
+                    <label for="report-end-date">End Date:</label>
+                    <input type="date" id="report-end-date">
+                </div>
+                <div class="form-group">
+                    <label for="report-session-filter">Session Filter:</label>
+                    <select id="report-session-filter">
+                        <option value="all">All Sessions</option>
+                        <option value="morning">Morning</option>
+                        <option value="afternoon">Afternoon</option>
+                        <option value="evening">Evening</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                </div>
+                <div class="form-group report-options">
+                    <label>Include in Report:</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" id="report-include-summary" checked> Summary statistics</label>
+                        <label><input type="checkbox" id="report-include-notes" checked> Exercise notes</label>
+                        <label><input type="checkbox" id="report-include-pain" checked> Pain levels</label>
+                        <label><input type="checkbox" id="report-include-difficulty" checked> Difficulty ratings</label>
+                        <label><input type="checkbox" id="report-include-timestamps" checked> Timestamps</label>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Generate Report</button>
             </form>
         </div>
     </div>
