@@ -118,6 +118,9 @@ let editingExerciseId = null;
 let currentCalendarDate = new Date();
 let timers = {};
 
+// Test mode flag - set to true to use mock data and separate storage
+let testMode = false;
+
 // Return-to-play milestones
 const defaultMilestones = [
     { id: 1, text: "Complete 1 week of exercises without pain", completed: false },
@@ -155,6 +158,56 @@ const achievementBadges = [
 
 let unlockedBadges = [];
 let pendingExerciseUpdates = null;
+
+// Mock data for testing
+function createMockData() {
+    const today = new Date();
+    const mockDailyLogs = {};
+
+    // Create 7 days of mock data (consecutive days ending today)
+    for (let i = 6; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        const dateStr = date.toISOString().split('T')[0];
+
+        mockDailyLogs[dateStr] = {
+            sessions: {
+                morning: {}
+            }
+        };
+
+        // Add exercise data for each exercise
+        defaultExercises.forEach(exercise => {
+            const completed = Math.random() > 0.2; // 80% completion rate
+            mockDailyLogs[dateStr].sessions.morning[exercise.id] = {
+                completed: completed,
+                reps: exercise.reps ? parseInt(exercise.reps) : 10,
+                weight: exercise.weight ? parseFloat(exercise.weight) : null,
+                pain: Math.floor(Math.random() * 3), // Random pain 0-2 (lower for better demo)
+                difficulty: Math.floor(Math.random() * 5) + 1, // Random difficulty 1-5
+                notes: completed ? "Test data entry" : "Skipped this exercise",
+                timestamp: new Date().toISOString(),
+                exerciseSnapshot: {
+                    id: exercise.id,
+                    name: exercise.name,
+                    description: exercise.description,
+                    reps: exercise.reps,
+                    hold: exercise.hold,
+                    frequency: exercise.frequency,
+                    weight: exercise.weight,
+                    version: exercise.metadata?.version || 1
+                }
+            };
+        });
+    }
+
+    return mockDailyLogs;
+}
+
+// Get storage key based on test mode
+function getStorageKey(baseKey) {
+    return testMode ? `test_${baseKey}` : baseKey;
+}
 
 // Exercise update detection system
 function checkForExerciseUpdates() {
@@ -369,30 +422,85 @@ function applyExerciseUpdates(updates) {
 }
 
 function initializeApp() {
+    // Check for test mode in URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    testMode = urlParams.get('test') === 'true';
+
     // Load data from localStorage
     loadData();
-    
+
     // Set default date to today
     document.getElementById('log-date').valueAsDate = new Date();
-    
+
     // Set up event listeners
     setupEventListeners();
-    
+
     // Initialize theme
     initializeTheme();
-    
+
     // Render initial content
     renderDailyExercises();
     renderManageExercises();
     updateProgress();
     updateCountdown();
+    renderMilestones();
+    renderBadges();
+
+    // Show test mode indicator if active
+    if (testMode) {
+        showTestModeIndicator();
+        updateTestModeButtons(true);
+    } else {
+        updateTestModeButtons(false);
+    }
+}
+
+function updateTestModeButtons(isTestMode) {
+    const toggleButton = document.getElementById('toggle-test-mode');
+    const clearButton = document.getElementById('clear-test-data');
+
+    if (isTestMode) {
+        toggleButton.textContent = 'Disable Test Mode';
+        toggleButton.classList.remove('btn-secondary');
+        toggleButton.classList.add('btn-danger');
+        clearButton.style.display = 'inline-block';
+    } else {
+        toggleButton.textContent = 'Enable Test Mode';
+        toggleButton.classList.remove('btn-danger');
+        toggleButton.classList.add('btn-secondary');
+        clearButton.style.display = 'none';
+    }
+}
+
+function showTestModeIndicator() {
+    const indicator = document.createElement('div');
+    indicator.style.cssText = `
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: #ff6b6b;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: bold;
+        z-index: 1000;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    `;
+    indicator.textContent = '🧪 TEST MODE';
+    document.body.appendChild(indicator);
 }
 
 function loadData() {
-    const storedExercises = localStorage.getItem('ptExercises');
-    const storedLogs = localStorage.getItem('ptDailyLogs');
-    const storedMilestones = localStorage.getItem('ptMilestones');
-    const storedBadges = localStorage.getItem('unlockedBadges');
+    const exercisesKey = getStorageKey('ptExercises');
+    const logsKey = getStorageKey('ptDailyLogs');
+    const milestonesKey = getStorageKey('ptMilestones');
+    const badgesKey = getStorageKey('unlockedBadges');
+
+    const storedExercises = localStorage.getItem(exercisesKey);
+    const storedLogs = localStorage.getItem(logsKey);
+    const storedMilestones = localStorage.getItem(milestonesKey);
+    const storedBadges = localStorage.getItem(badgesKey);
 
     if (storedExercises) {
         exercises = JSON.parse(storedExercises);
@@ -405,34 +513,47 @@ function loadData() {
 
     if (storedLogs) {
         dailyLogs = JSON.parse(storedLogs);
+    } else if (testMode) {
+        // Use mock data in test mode if no data exists
+        dailyLogs = createMockData();
+        saveDailyLogs();
     }
 
     if (storedMilestones) {
         milestones = JSON.parse(storedMilestones);
     } else {
         milestones = [...defaultMilestones];
+        // In test mode, pre-complete some milestones for demo
+        if (testMode) {
+            milestones[0].completed = true; // Complete 1 week
+            milestones[2].completed = true; // Complete 2 weeks
+        }
         saveMilestones();
     }
 
     if (storedBadges) {
         unlockedBadges = JSON.parse(storedBadges);
+    } else if (testMode) {
+        // Pre-unlock some badges for demo
+        unlockedBadges = ['first_day', 'three_day_streak', 'one_week'];
+        saveBadges();
     }
 }
 
 function saveExercises() {
-    localStorage.setItem('ptExercises', JSON.stringify(exercises));
+    localStorage.setItem(getStorageKey('ptExercises'), JSON.stringify(exercises));
 }
 
 function saveDailyLogs() {
-    localStorage.setItem('ptDailyLogs', JSON.stringify(dailyLogs));
+    localStorage.setItem(getStorageKey('ptDailyLogs'), JSON.stringify(dailyLogs));
 }
 
 function saveMilestones() {
-    localStorage.setItem('ptMilestones', JSON.stringify(milestones));
+    localStorage.setItem(getStorageKey('ptMilestones'), JSON.stringify(milestones));
 }
 
 function saveBadges() {
-    localStorage.setItem('unlockedBadges', JSON.stringify(unlockedBadges));
+    localStorage.setItem(getStorageKey('unlockedBadges'), JSON.stringify(unlockedBadges));
 }
 
 function setupEventListeners() {
@@ -478,6 +599,8 @@ function setupEventListeners() {
     });
     document.getElementById('import-file').addEventListener('change', importData);
     document.getElementById('clear-all-data').addEventListener('click', clearAllData);
+    document.getElementById('toggle-test-mode').addEventListener('click', toggleTestMode);
+    document.getElementById('clear-test-data').addEventListener('click', clearTestData);
     
     // Load reminder settings
     loadReminderSettings();
@@ -798,6 +921,7 @@ function updateProgress() {
         return false;
     });
 
+
     // Total days completed (days with at least one session)
     const totalDays = validDates.length;
 
@@ -855,7 +979,7 @@ function updateProgress() {
     let totalPossible = 0;
     let totalCompleted = 0;
 
-    dates.forEach(date => {
+    validDates.forEach(date => {
         const dayLog = dailyLogs[date];
         if (dayLog.sessions) {
             // New session-based structure
@@ -878,6 +1002,7 @@ function updateProgress() {
         }
     });
 
+
     const completionRate = totalPossible > 0 ? Math.round((totalCompleted / totalPossible) * 100) : 0;
     document.getElementById('completion-rate').textContent = `${completionRate}%`;
 
@@ -892,6 +1017,10 @@ function updateProgress() {
 
     // Update achievement badges
     updateAchievements();
+
+    // Update milestones and badges display
+    renderMilestones();
+    renderBadges();
 }
 
 function renderHistory(dates) {
@@ -1489,47 +1618,63 @@ function exportData() {
         dailyLogs: dailyLogs,
         milestones: milestones,
         unlockedBadges: unlockedBadges,
-        exportDate: new Date().toISOString()
+        exportDate: new Date().toISOString(),
+        testMode: testMode
     };
-    
+
     const dataStr = JSON.stringify(data, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(dataBlob);
-    
+
     const link = document.createElement('a');
     link.href = url;
-    link.download = `pt-tracker-backup-${new Date().toISOString().split('T')[0]}.json`;
+    const prefix = testMode ? 'test-' : '';
+    link.download = `${prefix}pt-tracker-backup-${new Date().toISOString().split('T')[0]}.json`;
     link.click();
-    
+
     URL.revokeObjectURL(url);
 }
 
 function importData(event) {
     const file = event.target.files[0];
     if (!file) return;
-    
+
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
             const data = JSON.parse(e.target.result);
-            
+
             if (data.exercises && data.dailyLogs) {
+                // Check if this is a test mode backup
+                const isTestBackup = data.testMode === true;
+
+                // Warn if importing test data into normal mode or vice versa
+                if (isTestBackup && !testMode) {
+                    if (!confirm('This backup appears to be from test mode. Import it into your real data?')) {
+                        return;
+                    }
+                } else if (!isTestBackup && testMode) {
+                    if (!confirm('This backup appears to be from real data. Import it into test mode?')) {
+                        return;
+                    }
+                }
+
                 exercises = data.exercises;
                 dailyLogs = data.dailyLogs;
-                
+
                 if (data.milestones) {
                     milestones = data.milestones;
                     saveMilestones();
                 }
-                
+
                 if (data.unlockedBadges) {
                     unlockedBadges = data.unlockedBadges;
                     saveBadges();
                 }
-                
+
                 saveExercises();
                 saveDailyLogs();
-                
+
                 renderDailyExercises();
                 renderManageExercises();
                 updateProgress();
@@ -1556,20 +1701,47 @@ function clearAllData() {
             dailyLogs = {};
             milestones = [...defaultMilestones];
             unlockedBadges = [];
-            
+
             saveExercises();
             saveDailyLogs();
             saveMilestones();
             saveBadges();
-            
+
             renderDailyExercises();
             renderManageExercises();
             updateProgress();
             renderMilestones();
             renderBadges();
-            
+
             alert('All data has been cleared.');
         }
+    }
+}
+
+function toggleTestMode() {
+    const currentUrl = new URL(window.location.href);
+    if (testMode) {
+        // Disable test mode
+        currentUrl.searchParams.delete('test');
+        alert('Test mode disabled. Reloading with your real data...');
+    } else {
+        // Enable test mode
+        currentUrl.searchParams.set('test', 'true');
+        alert('Test mode enabled. Reloading with mock data...');
+    }
+    window.location.href = currentUrl.toString();
+}
+
+function clearTestData() {
+    if (confirm('Are you sure you want to clear all test data?')) {
+        // Clear test storage keys
+        localStorage.removeItem('test_ptExercises');
+        localStorage.removeItem('test_ptDailyLogs');
+        localStorage.removeItem('test_ptMilestones');
+        localStorage.removeItem('test_unlockedBadges');
+
+        alert('Test data cleared. Reloading...');
+        window.location.reload();
     }
 }
 
@@ -1608,7 +1780,7 @@ function updateWeeklyGoals(dates) {
     const today = new Date();
     const startOfWeek = new Date(today);
     startOfWeek.setDate(today.getDate() - today.getDay()); // Start of week (Sunday)
-    
+
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 6); // End of week (Saturday)
     
@@ -1763,10 +1935,7 @@ function updateAchievements() {
             }
         }
     });
-            }
-        }
-    });
-    
+
     const completionRate = totalPossible > 0 ? Math.round((totalCompleted / totalPossible) * 100) : 0;
     const completedMilestones = milestones.filter(m => m.completed).length;
     

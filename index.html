@@ -52,7 +52,7 @@
             <div class="streak-indicator" id="streak-indicator">
                 <span class="streak-fire" id="streak-fire">🔥</span>
                 <span class="streak-count" id="streak-count">0</span>
-                <span class="streak-label">day streak</span>
+                <span class="streak-label" id="streak-label">day streak</span>
             </div>
         </header>
 
@@ -203,6 +203,15 @@
                         <input type="file" id="import-file" accept=".json" style="display: none;">
                     </div>
                     <p class="setting-description">Export your data to backup or import from a previous backup</p>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Test Mode</h3>
+                    <div class="setting-item">
+                        <button class="btn btn-secondary" id="toggle-test-mode">Enable Test Mode</button>
+                        <button class="btn btn-danger" id="clear-test-data" style="display: none;">Clear Test Data</button>
+                    </div>
+                    <p class="setting-description">Test mode uses mock data and separate storage to test changes without affecting your real data</p>
                 </div>
                 
                 <div class="settings-section">
