@@ -819,11 +819,13 @@ header h1 {
 
 .modal-content {
     background-color: var(--modal-bg);
-    margin: 10% auto;
+    margin: 5% auto;
     padding: 30px;
     border-radius: 16px;
     width: 90%;
     max-width: 500px;
+    max-height: 85vh;
+    overflow-y: auto;
     position: relative;
     animation: slideIn 0.3s ease;
     box-shadow: var(--shadow-xl);
@@ -1417,6 +1419,8 @@ header h1 {
         width: 95%;
         margin: 3% auto;
         border-radius: 12px;
+        max-height: 90vh;
+        overflow-y: auto;
     }
 
     .modal-content h2 {
