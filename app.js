@@ -783,10 +783,10 @@ function saveDayProgress() {
 }
 
 function updateProgress() {
-    const dates = Object.keys(dailyLogs).sort();
+    const allDates = Object.keys(dailyLogs).sort();
 
-    // Total days completed (days with at least one session)
-    const totalDays = dates.filter(date => {
+    // Filter to only include dates with valid session data
+    const validDates = allDates.filter(date => {
         const dayLog = dailyLogs[date];
         if (dayLog.sessions && Object.keys(dayLog.sessions).length > 0) {
             return true;
@@ -796,7 +796,10 @@ function updateProgress() {
             return true;
         }
         return false;
-    }).length;
+    });
+
+    // Total days completed (days with at least one session)
+    const totalDays = validDates.length;
 
     document.getElementById('total-days').textContent = totalDays;
 
@@ -804,8 +807,8 @@ function updateProgress() {
     let currentStreak = 0;
     const today = new Date().toISOString().split('T')[0];
 
-    for (let i = dates.length - 1; i >= 0; i--) {
-        const date = dates[i];
+    for (let i = validDates.length - 1; i >= 0; i--) {
+        const date = validDates[i];
         const dayLog = dailyLogs[date];
         let exercisesCompleted = 0;
 
@@ -877,16 +880,16 @@ function updateProgress() {
 
     const completionRate = totalPossible > 0 ? Math.round((totalCompleted / totalPossible) * 100) : 0;
     document.getElementById('completion-rate').textContent = `${completionRate}%`;
-    
+
     // Render exercise history
-    renderHistory(dates);
-    
+    renderHistory(validDates);
+
     // Update charts
-    updateCharts(dates);
-    
+    updateCharts(validDates);
+
     // Update weekly goals
-    updateWeeklyGoals(dates);
-    
+    updateWeeklyGoals(validDates);
+
     // Update achievement badges
     updateAchievements();
 }
@@ -908,7 +911,7 @@ function renderHistory(dates) {
         let completedExercises = 0;
 
         // Handle new session-based structure
-        if (dayLog.sessions) {
+        if (dayLog.sessions && Object.keys(dayLog.sessions).length > 0) {
             Object.values(dayLog.sessions).forEach(session => {
                 Object.values(session).forEach(log => {
                     totalExercises++;
@@ -1100,8 +1103,23 @@ function updateCompletionChart(dates) {
     
     const completionData = recentDates.map(date => {
         const dayLog = dailyLogs[date];
-        const total = Object.keys(dayLog).length;
-        const completed = Object.values(dayLog).filter(log => log.completed).length;
+        let total = 0;
+        let completed = 0;
+
+        // Handle new session-based structure
+        if (dayLog.sessions && Object.keys(dayLog.sessions).length > 0) {
+            Object.values(dayLog.sessions).forEach(session => {
+                Object.values(session).forEach(log => {
+                    total++;
+                    if (log.completed) completed++;
+                });
+            });
+        } else {
+            // Old data structure for backward compatibility
+            total = Object.keys(dayLog).length;
+            completed = Object.values(dayLog).filter(log => log.completed).length;
+        }
+
         return total > 0 ? Math.round((completed / total) * 100) : 0;
     });
     
@@ -1179,12 +1197,26 @@ function updatePainChart(dates) {
     
     const painData = recentDates.map(date => {
         const dayLog = dailyLogs[date];
-        const painValues = Object.values(dayLog)
-            .map(log => log.pain)
-            .filter(pain => pain !== null && pain !== undefined);
-        
+        let painValues = [];
+
+        // Handle new session-based structure
+        if (dayLog.sessions && Object.keys(dayLog.sessions).length > 0) {
+            Object.values(dayLog.sessions).forEach(session => {
+                Object.values(session).forEach(log => {
+                    if (log.pain !== null && log.pain !== undefined) {
+                        painValues.push(log.pain);
+                    }
+                });
+            });
+        } else {
+            // Old data structure for backward compatibility
+            painValues = Object.values(dayLog)
+                .map(log => log.pain)
+                .filter(pain => pain !== null && pain !== undefined);
+        }
+
         if (painValues.length === 0) return null;
-        
+
         const avgPain = painValues.reduce((sum, pain) => sum + pain, 0) / painValues.length;
         return Math.round(avgPain * 10) / 10;
     });
@@ -1262,12 +1294,26 @@ function updateDifficultyChart(dates) {
     
     const difficultyData = recentDates.map(date => {
         const dayLog = dailyLogs[date];
-        const difficultyValues = Object.values(dayLog)
-            .map(log => log.difficulty)
-            .filter(difficulty => difficulty !== null && difficulty !== undefined);
-        
+        let difficultyValues = [];
+
+        // Handle new session-based structure
+        if (dayLog.sessions && Object.keys(dayLog.sessions).length > 0) {
+            Object.values(dayLog.sessions).forEach(session => {
+                Object.values(session).forEach(log => {
+                    if (log.difficulty !== null && log.difficulty !== undefined) {
+                        difficultyValues.push(log.difficulty);
+                    }
+                });
+            });
+        } else {
+            // Old data structure for backward compatibility
+            difficultyValues = Object.values(dayLog)
+                .map(log => log.difficulty)
+                .filter(difficulty => difficulty !== null && difficulty !== undefined);
+        }
+
         if (difficultyValues.length === 0) return null;
-        
+
         const avgDifficulty = difficultyValues.reduce((sum, difficulty) => sum + difficulty, 0) / difficultyValues.length;
         return Math.round(avgDifficulty * 10) / 10;
     });
@@ -1581,18 +1627,34 @@ function updateWeeklyGoals(dates) {
     weekDates.forEach(date => {
         if (dailyLogs[date]) {
             const dayLog = dailyLogs[date];
-            const hasCompletedExercise = Object.values(dayLog).some(log => log.completed);
-            
+            let hasCompletedExercise = false;
+
+            // Handle new session-based structure
+            if (dayLog.sessions && Object.keys(dayLog.sessions).length > 0) {
+                Object.values(dayLog.sessions).forEach(session => {
+                    Object.values(session).forEach(log => {
+                        totalExercisesThisWeek++;
+                        if (log.completed) {
+                            completedExercisesThisWeek++;
+                            hasCompletedExercise = true;
+                        }
+                    });
+                });
+            } else {
+                // Old data structure for backward compatibility
+                hasCompletedExercise = Object.values(dayLog).some(log => log.completed);
+
+                Object.values(dayLog).forEach(log => {
+                    totalExercisesThisWeek++;
+                    if (log.completed) {
+                        completedExercisesThisWeek++;
+                    }
+                });
+            }
+
             if (hasCompletedExercise) {
                 daysCompleted++;
             }
-            
-            Object.values(dayLog).forEach(log => {
-                totalExercisesThisWeek++;
-                if (log.completed) {
-                    completedExercisesThisWeek++;
-                }
-            });
         }
     });
     
@@ -1615,45 +1677,92 @@ function updateWeeklyGoals(dates) {
 
 // Achievement functions
 function updateAchievements() {
-    const dates = Object.keys(dailyLogs).sort();
-    
+    const allDates = Object.keys(dailyLogs).sort();
+
+    // Filter to only include dates with valid session data
+    const validDates = allDates.filter(date => {
+        const dayLog = dailyLogs[date];
+        if (dayLog.sessions && Object.keys(dayLog.sessions).length > 0) {
+            return true;
+        }
+        // Support old data structure for backward compatibility
+        if (!dayLog.sessions && Object.keys(dayLog).length > 0) {
+            return true;
+        }
+        return false;
+    });
+
     // Calculate achievement data
-    const totalDays = dates.length;
-    
+    const totalDays = validDates.length;
+
     // Current streak calculation
     let currentStreak = 0;
-    for (let i = dates.length - 1; i >= 0; i--) {
-        const date = dates[i];
+    for (let i = validDates.length - 1; i >= 0; i--) {
+        const date = validDates[i];
         const dayLog = dailyLogs[date];
-        const exercisesCompleted = Object.values(dayLog).filter(log => log.completed).length;
-        
+        let exercisesCompleted = 0;
+
+        // Handle new session-based structure
+        if (dayLog.sessions && Object.keys(dayLog.sessions).length > 0) {
+            Object.values(dayLog.sessions).forEach(session => {
+                Object.values(session).forEach(exerciseData => {
+                    if (exerciseData.completed) exercisesCompleted++;
+                });
+            });
+        } else {
+            // Support old data structure
+            exercisesCompleted = Object.values(dayLog).filter(log => log.completed).length;
+        }
+
         if (exercisesCompleted > 0) {
             currentStreak++;
         } else {
             break;
         }
     }
-    
+
     // Completion rate
     let totalPossible = 0;
     let totalCompleted = 0;
     let lowPainDays = 0;
-    
-    dates.forEach(date => {
+
+    validDates.forEach(date => {
         const dayLog = dailyLogs[date];
-        Object.values(dayLog).forEach(log => {
-            totalPossible++;
-            if (log.completed) {
-                totalCompleted++;
-            }
-        });
-        
+        let painValues = [];
+
+        // Handle new session-based structure
+        if (dayLog.sessions && Object.keys(dayLog.sessions).length > 0) {
+            Object.values(dayLog.sessions).forEach(session => {
+                Object.values(session).forEach(log => {
+                    totalPossible++;
+                    if (log.completed) {
+                        totalCompleted++;
+                    }
+                    if (log.pain !== null && log.pain !== undefined) {
+                        painValues.push(log.pain);
+                    }
+                });
+            });
+        } else {
+            // Old data structure for backward compatibility
+            Object.values(dayLog).forEach(log => {
+                totalPossible++;
+                if (log.completed) {
+                    totalCompleted++;
+                }
+            });
+
+            painValues = Object.values(dayLog).map(log => log.pain).filter(pain => pain !== null && pain !== undefined);
+        }
+
         // Check for low pain day (average pain <= 2)
-        const painValues = Object.values(dayLog).map(log => log.pain).filter(pain => pain !== null && pain !== undefined);
         if (painValues.length > 0) {
             const avgPain = painValues.reduce((sum, pain) => sum + pain, 0) / painValues.length;
             if (avgPain <= 2) {
                 lowPainDays++;
+            }
+        }
+    });
             }
         }
     });
@@ -1786,7 +1895,7 @@ function renderCalendar() {
             let totalExercises = 0;
             let completedExercises = 0;
 
-            if (dayLog.sessions) {
+            if (dayLog.sessions && Object.keys(dayLog.sessions).length > 0) {
                 // New session-based structure
                 Object.values(dayLog.sessions).forEach(session => {
                     Object.values(session).forEach(exerciseData => {
