@@ -84,6 +84,40 @@
                     <input type="text" id="custom-session-name" placeholder="Session name" style="display: none;">
                 </div>
 
+                <div class="exercise-card swelling-panel">
+                    <div class="exercise-header">
+                        <h3 class="exercise-title">Swelling Check-In</h3>
+                    </div>
+                    <p class="exercise-description">Log swelling once per day (e.g. in the morning before activity) to spot trends early.</p>
+                    <div class="tracking-row">
+                        <div class="tracking-group">
+                            <label for="swelling-level">Swelling Level (0-10):</label>
+                            <input type="number" id="swelling-level" min="0" max="10" placeholder="0 = none, 10 = severe">
+                        </div>
+                        <div class="tracking-group">
+                            <label for="swelling-location">Location:</label>
+                            <input type="text" id="swelling-location" placeholder="e.g. Left knee, ankle">
+                        </div>
+                        <div class="tracking-group">
+                            <label for="swelling-circumference">Circumference (in):</label>
+                            <input type="number" step="0.1" id="swelling-circumference" placeholder="Optional measurement">
+                        </div>
+                        <div class="tracking-group">
+                            <label for="swelling-time">Time of Day:</label>
+                            <select id="swelling-time">
+                                <option value="morning">Morning</option>
+                                <option value="afternoon">Afternoon</option>
+                                <option value="evening">Evening</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="tracking-group">
+                        <label for="swelling-notes">Notes:</label>
+                        <textarea id="swelling-notes" rows="2" placeholder="Warmth, redness, pitting, comparison to yesterday, etc."></textarea>
+                    </div>
+                    <button class="btn btn-secondary" id="save-swelling">Save Swelling Log</button>
+                </div>
+
                 <div class="exercise-list" id="daily-exercises">
                     <!-- Exercises will be populated here -->
                 </div>
@@ -190,6 +224,11 @@
                 <h3>Difficulty Trends</h3>
                 <div class="weekly-chart">
                     <canvas id="difficultyChart"></canvas>
+                </div>
+
+                <h3>Swelling Trends</h3>
+                <div class="weekly-chart">
+                    <canvas id="swellingChart"></canvas>
                 </div>
 
                 <h3>Exercise History</h3>
@@ -348,6 +387,7 @@
                         <label><input type="checkbox" id="report-include-notes" checked> Exercise notes</label>
                         <label><input type="checkbox" id="report-include-pain" checked> Pain levels</label>
                         <label><input type="checkbox" id="report-include-difficulty" checked> Difficulty ratings</label>
+                        <label><input type="checkbox" id="report-include-swelling" checked> Swelling logs</label>
                         <label><input type="checkbox" id="report-include-timestamps" checked> Timestamps</label>
                     </div>
                 </div>

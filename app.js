@@ -114,6 +114,7 @@ const defaultExercises = [
 
 let exercises = [];
 let dailyLogs = {};
+let swellingLogs = {};
 let editingExerciseId = null;
 let currentCalendarDate = new Date();
 let timers = {};
@@ -450,6 +451,7 @@ function initializeApp() {
 
     // Render initial content
     renderDailyExercises();
+    renderSwellingLog();
     renderManageExercises();
     updateProgress();
     updateCountdown();
@@ -504,11 +506,13 @@ function showTestModeIndicator() {
 function loadData() {
     const exercisesKey = getStorageKey('ptExercises');
     const logsKey = getStorageKey('ptDailyLogs');
+    const swellingKey = getStorageKey('ptSwellingLogs');
     const milestonesKey = getStorageKey('ptMilestones');
     const badgesKey = getStorageKey('unlockedBadges');
 
     const storedExercises = localStorage.getItem(exercisesKey);
     const storedLogs = localStorage.getItem(logsKey);
+    const storedSwellingLogs = localStorage.getItem(swellingKey);
     const storedMilestones = localStorage.getItem(milestonesKey);
     const storedBadges = localStorage.getItem(badgesKey);
 
@@ -527,6 +531,10 @@ function loadData() {
         // Use mock data in test mode if no data exists
         dailyLogs = createMockData();
         saveDailyLogs();
+    }
+
+    if (storedSwellingLogs) {
+        swellingLogs = JSON.parse(storedSwellingLogs);
     }
 
     if (storedMilestones) {
@@ -558,6 +566,10 @@ function saveDailyLogs() {
     localStorage.setItem(getStorageKey('ptDailyLogs'), JSON.stringify(dailyLogs));
 }
 
+function saveSwellingLogs() {
+    localStorage.setItem(getStorageKey('ptSwellingLogs'), JSON.stringify(swellingLogs));
+}
+
 function saveMilestones() {
     localStorage.setItem(getStorageKey('ptMilestones'), JSON.stringify(milestones));
 }
@@ -576,6 +588,10 @@ function setupEventListeners() {
     
     // Date change
     document.getElementById('log-date').addEventListener('change', renderDailyExercises);
+    document.getElementById('log-date').addEventListener('change', renderSwellingLog);
+
+    // Save swelling log
+    document.getElementById('save-swelling').addEventListener('click', saveSwellingLog);
 
     // Session type change
     document.getElementById('session-type').addEventListener('change', function() {
@@ -776,6 +792,43 @@ function renderDailyExercises() {
     
     // Set up timer buttons after rendering
     setupTimerButtons();
+}
+
+function renderSwellingLog() {
+    const selectedDate = document.getElementById('log-date').value;
+    const swelling = swellingLogs[selectedDate] || {};
+
+    document.getElementById('swelling-level').value = swelling.level ?? '';
+    document.getElementById('swelling-location').value = swelling.location || '';
+    document.getElementById('swelling-circumference').value = swelling.circumference ?? '';
+    document.getElementById('swelling-time').value = swelling.time || 'morning';
+    document.getElementById('swelling-notes').value = swelling.notes || '';
+}
+
+function saveSwellingLog() {
+    const selectedDate = document.getElementById('log-date').value;
+    if (!selectedDate) {
+        alert('Please select a date');
+        return;
+    }
+
+    const level = document.getElementById('swelling-level').value;
+    const location = document.getElementById('swelling-location').value.trim();
+    const circumference = document.getElementById('swelling-circumference').value;
+    const time = document.getElementById('swelling-time').value;
+    const notes = document.getElementById('swelling-notes').value;
+
+    swellingLogs[selectedDate] = {
+        level: level ? parseInt(level) : null,
+        location,
+        circumference: circumference ? parseFloat(circumference) : null,
+        time,
+        notes,
+        timestamp: new Date().toISOString()
+    };
+
+    saveSwellingLogs();
+    alert('Swelling log saved!');
 }
 
 function renderManageExercises() {
@@ -1237,11 +1290,13 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', fun
 let completionChart = null;
 let painChart = null;
 let difficultyChart = null;
+let swellingChart = null;
 
 function updateCharts(dates) {
     updateCompletionChart(dates);
     updatePainChart(dates);
     updateDifficultyChart(dates);
+    updateSwellingChart(dates);
 }
 
 function updateCompletionChart(dates) {
@@ -1532,6 +1587,85 @@ function updateDifficultyChart(dates) {
     });
 }
 
+function updateSwellingChart(dates) {
+    const ctx = document.getElementById('swellingChart').getContext('2d');
+
+    // Include any dates that only have a swelling entry (e.g. rest days with no exercises logged)
+    const allDates = Array.from(new Set([...dates, ...Object.keys(swellingLogs)])).sort();
+
+    // Get last 7 days of data
+    const recentDates = allDates.slice(-7);
+
+    const labels = recentDates.map(date => {
+        const d = new Date(date);
+        return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    });
+
+    const swellingData = recentDates.map(date => {
+        const level = swellingLogs[date]?.level;
+        return (level !== null && level !== undefined) ? level : null;
+    });
+
+    if (swellingChart) {
+        swellingChart.destroy();
+    }
+
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const textColor = isDark ? '#eaeaea' : '#212529';
+    const gridColor = isDark ? '#374151' : '#dee2e6';
+
+    swellingChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Swelling Level (0-10)',
+                data: swellingData,
+                borderColor: '#06b6d4',
+                backgroundColor: 'rgba(6, 182, 212, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#06b6d4',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                spanGaps: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 10,
+                    ticks: {
+                        color: textColor,
+                        stepSize: 1
+                    },
+                    grid: {
+                        color: gridColor
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: textColor
+                    },
+                    grid: {
+                        color: gridColor
+                    }
+                }
+            }
+        }
+    });
+}
+
 // Update charts when theme changes
 const originalSetTheme = setTheme;
 setTheme = function(theme) {
@@ -1641,6 +1775,7 @@ function exportData() {
     const data = {
         exercises: exercises,
         dailyLogs: dailyLogs,
+        swellingLogs: swellingLogs,
         milestones: milestones,
         unlockedBadges: unlockedBadges,
         exportDate: new Date().toISOString(),
@@ -1687,6 +1822,11 @@ function importData(event) {
                 exercises = data.exercises;
                 dailyLogs = data.dailyLogs;
 
+                if (data.swellingLogs) {
+                    swellingLogs = data.swellingLogs;
+                    saveSwellingLogs();
+                }
+
                 if (data.milestones) {
                     milestones = data.milestones;
                     saveMilestones();
@@ -1701,6 +1841,7 @@ function importData(event) {
                 saveDailyLogs();
 
                 renderDailyExercises();
+                renderSwellingLog();
                 renderManageExercises();
                 updateProgress();
                 renderMilestones();
@@ -1724,15 +1865,18 @@ function clearAllData() {
         if (confirm('This will permanently delete all exercises and progress logs. Continue?')) {
             exercises = [];
             dailyLogs = {};
+            swellingLogs = {};
             milestones = [...defaultMilestones];
             unlockedBadges = [];
 
             saveExercises();
             saveDailyLogs();
+            saveSwellingLogs();
             saveMilestones();
             saveBadges();
 
             renderDailyExercises();
+            renderSwellingLog();
             renderManageExercises();
             updateProgress();
             renderMilestones();
@@ -1762,6 +1906,7 @@ function clearTestData() {
         // Clear test storage keys
         localStorage.removeItem('test_ptExercises');
         localStorage.removeItem('test_ptDailyLogs');
+        localStorage.removeItem('test_ptSwellingLogs');
         localStorage.removeItem('test_ptMilestones');
         localStorage.removeItem('test_unlockedBadges');
 
@@ -2506,12 +2651,14 @@ function generateReport() {
     const includeNotes = document.getElementById('report-include-notes').checked;
     const includePain = document.getElementById('report-include-pain').checked;
     const includeDifficulty = document.getElementById('report-include-difficulty').checked;
+    const includeSwelling = document.getElementById('report-include-swelling').checked;
     const includeTimestamps = document.getElementById('report-include-timestamps').checked;
 
     const startDate = startInput ? new Date(`${startInput}T00:00:00`) : null;
     const endDate = endInput ? new Date(`${endInput}T23:59:59`) : null;
 
-    const filteredDates = Object.keys(dailyLogs).filter(dateStr => {
+    const allLoggedDates = Array.from(new Set([...Object.keys(dailyLogs), ...Object.keys(swellingLogs)]));
+    const filteredDates = allLoggedDates.filter(dateStr => {
         const date = new Date(`${dateStr}T00:00:00`);
         if (startDate && date < startDate) return false;
         if (endDate && date > endDate) return false;
@@ -2525,12 +2672,14 @@ function generateReport() {
     let painCount = 0;
     let difficultySum = 0;
     let difficultyCount = 0;
+    let swellingSum = 0;
+    let swellingCount = 0;
 
     const daysHtml = [];
     const textLines = [];
 
     filteredDates.forEach(dateStr => {
-        const dayLog = dailyLogs[dateStr];
+        const dayLog = dailyLogs[dateStr] || { sessions: {} };
         const formattedDate = new Date(`${dateStr}T00:00:00`).toLocaleDateString('en-US', {
             weekday: 'short',
             year: 'numeric',
@@ -2621,6 +2770,30 @@ function generateReport() {
             `);
         });
 
+        const swelling = swellingLogs[dateStr];
+        if (includeSwelling && swelling && (swelling.level != null || swelling.location || swelling.circumference != null || swelling.notes)) {
+            if (swelling.level != null) {
+                swellingSum += swelling.level;
+                swellingCount++;
+            }
+
+            const swellingDetails = [];
+            if (swelling.level != null) swellingDetails.push(`level ${swelling.level}/10`);
+            if (swelling.location) swellingDetails.push(swelling.location);
+            if (swelling.circumference != null) swellingDetails.push(`${swelling.circumference} in`);
+            if (swelling.time) swellingDetails.push(swelling.time);
+            if (swelling.notes) swellingDetails.push(`notes: ${swelling.notes}`);
+
+            dayHtml.push(`
+                <div class="report-session">
+                    <div class="session-title">Swelling</div>
+                    <ul class="report-exercises"><li class="report-exercise">${escapeHtml(swellingDetails.join(', '))}</li></ul>
+                </div>
+            `);
+            textLines.push(`  Swelling: ${swellingDetails.join(', ')}`);
+            hasVisibleSession = true;
+        }
+
         if (hasVisibleSession) {
             daysHtml.push(`
                 <div class="day-section">
@@ -2637,12 +2810,13 @@ function generateReport() {
     const completionRate = totalExercises > 0 ? Math.round((completedExercises / totalExercises) * 100) : 0;
     const avgPain = painCount > 0 ? (painSum / painCount).toFixed(1) : '—';
     const avgDifficulty = difficultyCount > 0 ? (difficultySum / difficultyCount).toFixed(1) : '—';
+    const avgSwelling = swellingCount > 0 ? (swellingSum / swellingCount).toFixed(1) : '—';
 
     const dateRangeText = startInput && endInput
         ? `${new Date(`${startInput}T00:00:00`).toLocaleDateString('en-US')} – ${new Date(`${endInput}T00:00:00`).toLocaleDateString('en-US')}`
         : 'All available dates';
 
-    const summaryHtml = includeSummary && totalExercises > 0 ? `
+    const summaryHtml = includeSummary && (totalExercises > 0 || swellingCount > 0) ? `
         <div class="summary">
             <div class="summary-card"><div class="value">${filteredDates.length}</div><div class="label">Days</div></div>
             <div class="summary-card"><div class="value">${totalSessions}</div><div class="label">Sessions</div></div>
@@ -2650,11 +2824,12 @@ function generateReport() {
             <div class="summary-card"><div class="value">${completionRate}%</div><div class="label">Completion Rate</div></div>
             <div class="summary-card"><div class="value">${avgPain}</div><div class="label">Avg Pain</div></div>
             <div class="summary-card"><div class="value">${avgDifficulty}</div><div class="label">Avg Difficulty</div></div>
+            ${includeSwelling ? `<div class="summary-card"><div class="value">${avgSwelling}</div><div class="label">Avg Swelling</div></div>` : ''}
         </div>
     ` : '';
 
-    const summaryText = includeSummary && totalExercises > 0
-        ? `Summary: ${filteredDates.length} days, ${totalSessions} sessions, ${completedExercises}/${totalExercises} completed (${completionRate}%). Average pain: ${avgPain}, average difficulty: ${avgDifficulty}.`
+    const summaryText = includeSummary && (totalExercises > 0 || swellingCount > 0)
+        ? `Summary: ${filteredDates.length} days, ${totalSessions} sessions, ${completedExercises}/${totalExercises} completed (${completionRate}%). Average pain: ${avgPain}, average difficulty: ${avgDifficulty}${includeSwelling ? `, average swelling: ${avgSwelling}` : ''}.`
         : '';
 
     const plainTextReport = [
@@ -2674,7 +2849,7 @@ function generateReport() {
         plainTextReport,
         emailBody,
         smsBody,
-        hasData: totalExercises > 0
+        hasData: totalExercises > 0 || swellingCount > 0
     });
 
     const blob = new Blob([reportHtml], { type: 'text/html' });
