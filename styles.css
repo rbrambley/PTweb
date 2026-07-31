@@ -661,6 +661,19 @@ header h1 {
     transform: translateY(-1px);
 }
 
+.btn-text {
+    background: transparent;
+    color: var(--accent-primary);
+    padding: 4px 10px;
+    font-size: 0.85em;
+    font-weight: 600;
+}
+
+.btn-text:hover {
+    background: var(--bg-tertiary);
+    color: var(--accent-secondary);
+}
+
 .progress-summary {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -1280,6 +1293,21 @@ header h1 {
         font-size: 0.6em;
     }
 
+    .calendar-month-group {
+        gap: 4px;
+    }
+
+    .calendar-legend {
+        gap: 10px;
+        font-size: 0.75em;
+    }
+
+    .calendar-tooltip {
+        max-width: 200px;
+        padding: 8px 10px;
+        font-size: 0.8em;
+    }
+
     .history-item {
         padding: 10px;
         gap: 8px;
@@ -1503,6 +1531,129 @@ h3 {
 
 .calendar-day.empty:hover {
     transform: none;
+}
+
+.calendar-month-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.calendar-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+    margin-top: -10px;
+    margin-bottom: 20px;
+    font-size: 0.85em;
+    color: var(--text-secondary);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.legend-marker {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    display: inline-block;
+}
+
+.legend-marker.today {
+    border: 2px solid var(--accent-primary);
+    background: var(--bg-tertiary);
+}
+
+.legend-marker.complete {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+}
+
+.legend-marker.partial {
+    background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+    border: none;
+}
+
+.legend-marker.no-data {
+    background: var(--bg-tertiary);
+}
+
+.calendar-tooltip {
+    position: fixed;
+    z-index: 1000;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 12px 14px;
+    box-shadow: var(--shadow-lg);
+    font-size: 0.85em;
+    color: var(--text-primary);
+    max-width: 260px;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.calendar-tooltip.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.tooltip-title {
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 4px;
+}
+
+.tooltip-summary {
+    font-weight: 600;
+    color: var(--accent-primary);
+    margin-bottom: 8px;
+}
+
+.tooltip-empty {
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.tooltip-session {
+    margin-bottom: 8px;
+}
+
+.tooltip-session-name {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.9em;
+    margin-bottom: 2px;
+}
+
+.tooltip-exercise {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 1px 0;
+}
+
+.tooltip-status {
+    font-weight: 700;
+    width: 14px;
+    text-align: center;
+}
+
+.tooltip-status.complete {
+    color: var(--success);
+}
+
+.tooltip-status.incomplete {
+    color: var(--text-secondary);
 }
 
 /* Settings Styles */

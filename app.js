@@ -600,6 +600,11 @@ function setupEventListeners() {
         renderCalendar();
     });
     
+    document.getElementById('today-month').addEventListener('click', () => {
+        currentCalendarDate = new Date();
+        renderCalendar();
+    });
+    
     // Settings functionality
     document.getElementById('enable-reminders').addEventListener('click', enableReminders);
     document.getElementById('disable-reminders').addEventListener('click', disableReminders);
@@ -2115,6 +2120,8 @@ function toggleTimer(exerciseId, btn) {
 function renderCalendar() {
     const grid = document.getElementById('calendar-grid');
     const monthLabel = document.getElementById('calendar-month-label');
+    const tooltip = document.getElementById('calendar-tooltip');
+    if (tooltip) tooltip.classList.remove('visible');
     
     const year = currentCalendarDate.getFullYear();
     const month = currentCalendarDate.getMonth();
@@ -2187,14 +2194,98 @@ function renderCalendar() {
     
     grid.innerHTML = html;
     
-    // Add click handlers to calendar days
+    // Add click and hover handlers to calendar days
     document.querySelectorAll('.calendar-day:not(.empty)').forEach(day => {
         day.addEventListener('click', function() {
             const date = this.dataset.date;
             document.getElementById('log-date').value = date;
             switchTab('daily');
         });
+
+        day.addEventListener('mouseenter', function() {
+            const date = this.dataset.date;
+            tooltip.innerHTML = getCalendarDayTooltip(date);
+            tooltip.classList.add('visible');
+            tooltip.setAttribute('aria-hidden', 'false');
+            positionCalendarTooltip(this, tooltip);
+        });
+
+        day.addEventListener('mouseleave', function() {
+            tooltip.classList.remove('visible');
+            tooltip.setAttribute('aria-hidden', 'true');
+        });
     });
+}
+
+function getCalendarDayTooltip(dateStr) {
+    const dayLog = dailyLogs[dateStr];
+    const dateLabel = new Date(`${dateStr}T00:00:00`).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
+    if (!dayLog) {
+        return `<div class="tooltip-title">${dateLabel}</div><div class="tooltip-empty">No exercises logged.</div>`;
+    }
+
+    let totalExercises = 0;
+    let completedExercises = 0;
+    let sessionsHtml = '';
+
+    if (dayLog.sessions && Object.keys(dayLog.sessions).length > 0) {
+        sessionsHtml = Object.entries(dayLog.sessions).map(([sessionName, sessionData]) => {
+            const exerciseEntries = Object.entries(sessionData);
+            if (exerciseEntries.length === 0) return '';
+            const exerciseList = exerciseEntries.map(([exerciseId, exerciseData]) => {
+                totalExercises++;
+                if (exerciseData.completed) completedExercises++;
+                const exerciseName = getExerciseName(exerciseData, exerciseId);
+                const statusIcon = exerciseData.completed ? '✓' : '○';
+                return `<div class="tooltip-exercise"><span class="tooltip-status ${exerciseData.completed ? 'complete' : 'incomplete'}">${statusIcon}</span> ${escapeHtml(exerciseName)}</div>`;
+            }).join('');
+            return `<div class="tooltip-session"><div class="tooltip-session-name">${escapeHtml(sessionName)}</div>${exerciseList}</div>`;
+        }).join('');
+    } else {
+        // Old data structure for backward compatibility
+        const exerciseEntries = Object.entries(dayLog);
+        if (exerciseEntries.length === 0) {
+            return `<div class="tooltip-title">${dateLabel}</div><div class="tooltip-empty">No exercises logged.</div>`;
+        }
+        sessionsHtml = exerciseEntries.map(([exerciseId, log]) => {
+            totalExercises++;
+            if (log.completed) completedExercises++;
+            const exerciseName = getExerciseName(log, exerciseId);
+            const statusIcon = log.completed ? '✓' : '○';
+            return `<div class="tooltip-exercise"><span class="tooltip-status ${log.completed ? 'complete' : 'incomplete'}">${statusIcon}</span> ${escapeHtml(exerciseName)}</div>`;
+        }).join('');
+    }
+
+    if (totalExercises === 0) {
+        return `<div class="tooltip-title">${dateLabel}</div><div class="tooltip-empty">No exercises logged.</div>`;
+    }
+
+    const summary = `${completedExercises}/${totalExercises} completed`;
+    return `
+        <div class="tooltip-title">${dateLabel}</div>
+        <div class="tooltip-summary">${summary}</div>
+        ${sessionsHtml}
+    `;
+}
+
+function positionCalendarTooltip(dayEl, tooltip) {
+    const dayRect = dayEl.getBoundingClientRect();
+    const tooltipRect = tooltip.getBoundingClientRect();
+    const padding = 8;
+    let left = dayRect.left + dayRect.width / 2 - tooltipRect.width / 2;
+    let top = dayRect.bottom + padding;
+
+    if (left < padding) left = padding;
+    if (left + tooltipRect.width > window.innerWidth - padding) {
+        left = window.innerWidth - tooltipRect.width - padding;
+    }
+    if (top + tooltipRect.height > window.innerHeight - padding) {
+        top = dayRect.top - tooltipRect.height - padding;
+    }
+
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${top}px`;
 }
 
 // Report generation

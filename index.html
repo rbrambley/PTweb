@@ -96,12 +96,22 @@
                 <h2>Exercise Calendar</h2>
                 <div class="calendar-controls">
                     <button class="btn btn-secondary" id="prev-month">&lt; Previous</button>
-                    <span class="calendar-month" id="calendar-month-label">July 2026</span>
+                    <div class="calendar-month-group">
+                        <span class="calendar-month" id="calendar-month-label">July 2026</span>
+                        <button class="btn btn-text" id="today-month" title="Jump to today">Today</button>
+                    </div>
                     <button class="btn btn-secondary" id="next-month">Next &gt;</button>
                 </div>
                 <div class="calendar-grid" id="calendar-grid">
                     <!-- Calendar will be populated here -->
                 </div>
+                <div class="calendar-legend">
+                    <div class="legend-item"><span class="legend-marker today"></span> Today</div>
+                    <div class="legend-item"><span class="legend-marker complete"></span> Complete</div>
+                    <div class="legend-item"><span class="legend-marker partial"></span> Partial</div>
+                    <div class="legend-item"><span class="legend-marker no-data"></span> No data</div>
+                </div>
+                <div class="calendar-tooltip" id="calendar-tooltip" role="tooltip" aria-hidden="true"></div>
             </section>
 
             <!-- Progress Tab -->
