@@ -58,9 +58,10 @@
 
         <nav class="tabs">
             <button class="tab active" data-tab="daily">Daily Log</button>
-            <button class="tab" data-tab="exercises">Manage Exercises</button>
             <button class="tab" data-tab="calendar">Calendar</button>
             <button class="tab" data-tab="progress">Progress</button>
+            <button class="tab" data-tab="milestones">Return to Play</button>
+            <button class="tab" data-tab="exercises">Manage Exercises</button>
             <button class="tab" data-tab="settings">Settings</button>
         </nav>
 
@@ -88,16 +89,6 @@
                 </div>
 
                 <button class="btn btn-primary" id="save-day">Save Session Progress</button>
-            </section>
-
-            <!-- Manage Exercises Tab -->
-            <section id="exercises-tab" class="tab-content">
-                <h2>Current Exercises</h2>
-                <div class="exercise-list" id="manage-exercises">
-                    <!-- Exercise management will be populated here -->
-                </div>
-
-                <button class="btn btn-secondary" id="add-exercise">Add New Exercise</button>
             </section>
 
             <!-- Calendar Tab -->
@@ -180,6 +171,40 @@
                 </div>
             </section>
 
+            <!-- Return to Play Milestones Tab -->
+            <section id="milestones-tab" class="tab-content">
+                <h2>Return to Play Milestones</h2>
+
+                <div class="milestone-summary">
+                    <div class="milestone-overall-header">
+                        <span>Overall Progress</span>
+                        <span id="milestone-overall-count">0 / 0 complete</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="milestone-overall-bar" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="next-up-card" id="next-up-card" style="display: none;">
+                    <div class="next-up-label">🎯 Next Up</div>
+                    <div class="next-up-text" id="next-up-text"></div>
+                </div>
+
+                <div class="milestone-timeline" id="milestone-timeline">
+                    <!-- Milestone phases/timeline will be populated here -->
+                </div>
+            </section>
+
+            <!-- Manage Exercises Tab -->
+            <section id="exercises-tab" class="tab-content">
+                <h2>Current Exercises</h2>
+                <div class="exercise-list" id="manage-exercises">
+                    <!-- Exercise management will be populated here -->
+                </div>
+
+                <button class="btn btn-secondary" id="add-exercise">Add New Exercise</button>
+            </section>
+
             <!-- Settings Tab -->
             <section id="settings-tab" class="tab-content">
                 <h2>Settings</h2>
@@ -220,13 +245,6 @@
                         <button class="btn btn-danger" id="clear-all-data">Clear All Data</button>
                     </div>
                     <p class="setting-description">Permanently delete all your exercise data (cannot be undone)</p>
-                </div>
-                
-                <div class="settings-section">
-                    <h3>Return-to-Play Milestones</h3>
-                    <div class="milestone-list" id="milestone-list">
-                        <!-- Milestones will be populated here -->
-                    </div>
                 </div>
             </section>
         </main>

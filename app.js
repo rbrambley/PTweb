@@ -140,6 +140,16 @@ const defaultMilestones = [
 
 let milestones = [];
 
+// Groups milestones into recovery phases for the Return to Play timeline.
+// Defined by milestone id ranges so it stays in sync even for milestones
+// saved to localStorage before this grouping existed.
+const milestonePhases = [
+    { name: 'Weeks 1-2: Foundation', icon: '🌱', minId: 1, maxId: 4 },
+    { name: 'Weeks 3-4: Building Strength', icon: '💪', minId: 5, maxId: 8 },
+    { name: 'Weeks 5-6: Advanced Training', icon: '🚀', minId: 9, maxId: 12 },
+    { name: 'Return to Competition', icon: '🏆', minId: 13, maxId: 13 }
+];
+
 // Achievement badges
 const achievementBadges = [
     { id: 'first_day', name: 'First Steps', description: 'Complete your first day of exercises', icon: '🎯', check: (data) => data.totalDays >= 1 },
@@ -647,6 +657,9 @@ function switchTab(tabName) {
     // Load reminder settings when switching to settings tab
     if (tabName === 'settings') {
         loadReminderSettings();
+    }
+
+    if (tabName === 'milestones') {
         renderMilestones();
     }
 }
@@ -1747,19 +1760,68 @@ function clearTestData() {
 
 // Milestone functions
 function renderMilestones() {
-    const container = document.getElementById('milestone-list');
-    
-    container.innerHTML = milestones.map(milestone => `
-        <div class="milestone-item ${milestone.completed ? 'completed' : ''}">
-            <input type="checkbox" class="milestone-checkbox" data-milestone-id="${milestone.id}" ${milestone.completed ? 'checked' : ''}>
-            <span class="milestone-text">${milestone.text}</span>
-            <span class="milestone-icon">${milestone.completed ? '✅' : '⭕'}</span>
-        </div>
-    `).join('');
-    
-    // Add event listeners to milestone checkboxes
-    document.querySelectorAll('.milestone-checkbox').forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
+    const timeline = document.getElementById('milestone-timeline');
+    if (!timeline) return; // Not on the Return to Play tab
+
+    const total = milestones.length;
+    const completedCount = milestones.filter(m => m.completed).length;
+    const overallPercent = total > 0 ? Math.round((completedCount / total) * 100) : 0;
+
+    // Overall progress bar
+    const overallBar = document.getElementById('milestone-overall-bar');
+    const overallCount = document.getElementById('milestone-overall-count');
+    if (overallBar) overallBar.style.width = `${overallPercent}%`;
+    if (overallCount) overallCount.textContent = `${completedCount} / ${total} complete (${overallPercent}%)`;
+
+    // "Next up" callout - the first incomplete milestone in order
+    const nextUpCard = document.getElementById('next-up-card');
+    const nextUpText = document.getElementById('next-up-text');
+    const nextMilestone = milestones.find(m => !m.completed);
+    if (nextUpCard && nextUpText) {
+        if (nextMilestone) {
+            nextUpCard.style.display = '';
+            nextUpText.textContent = nextMilestone.text;
+        } else {
+            nextUpCard.style.display = 'none';
+        }
+    }
+
+    // Group milestones into phases and render as a vertical timeline
+    timeline.innerHTML = milestonePhases.map(phase => {
+        const phaseMilestones = milestones.filter(m => m.id >= phase.minId && m.id <= phase.maxId);
+        if (phaseMilestones.length === 0) return '';
+
+        const phaseCompleted = phaseMilestones.filter(m => m.completed).length;
+        const isPhaseDone = phaseCompleted === phaseMilestones.length;
+
+        const steps = phaseMilestones.map(milestone => {
+            const isNext = nextMilestone && milestone.id === nextMilestone.id;
+            return `
+                <div class="milestone-step ${milestone.completed ? 'completed' : ''} ${isNext ? 'next' : ''}" data-milestone-id="${milestone.id}">
+                    <div class="milestone-step-marker">${milestone.completed ? '✓' : ''}</div>
+                    <div class="milestone-step-content">
+                        <span class="milestone-text">${milestone.text}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        return `
+            <div class="milestone-phase ${isPhaseDone ? 'completed' : ''}">
+                <div class="milestone-phase-header">
+                    <span class="milestone-phase-name">${phase.icon} ${phase.name}</span>
+                    <span class="milestone-phase-count">${phaseCompleted}/${phaseMilestones.length}</span>
+                </div>
+                <div class="milestone-steps">
+                    ${steps}
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    // Tapping/clicking a step toggles its completion
+    document.querySelectorAll('.milestone-step').forEach(step => {
+        step.addEventListener('click', function() {
             const milestoneId = parseInt(this.dataset.milestoneId);
             toggleMilestone(milestoneId);
         });
@@ -1772,7 +1834,28 @@ function toggleMilestone(id) {
         milestone.completed = !milestone.completed;
         saveMilestones();
         renderMilestones();
+        updateAchievements();
+
+        if (milestone.completed) {
+            showMilestoneToast(`🎉 Milestone complete: ${milestone.text}`);
+        }
     }
+}
+
+// Shows a brief, self-dismissing toast celebrating a completed milestone.
+function showMilestoneToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'milestone-toast';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    // Trigger enter animation
+    requestAnimationFrame(() => toast.classList.add('show'));
+
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
 }
 
 // Weekly goals functions
