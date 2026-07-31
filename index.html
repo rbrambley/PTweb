@@ -111,6 +111,24 @@
                     <div class="legend-item"><span class="legend-marker partial"></span> Partial</div>
                     <div class="legend-item"><span class="legend-marker no-data"></span> No data</div>
                 </div>
+                <div class="calendar-month-stats" id="calendar-month-stats">
+                    <div class="month-stat">
+                        <span class="month-stat-value" id="month-stat-days">0</span>
+                        <span class="month-stat-label">Days Logged</span>
+                    </div>
+                    <div class="month-stat">
+                        <span class="month-stat-value" id="month-stat-exercises">0</span>
+                        <span class="month-stat-label">Exercises Done</span>
+                    </div>
+                    <div class="month-stat">
+                        <span class="month-stat-value" id="month-stat-rate">0%</span>
+                        <span class="month-stat-label">Completion</span>
+                    </div>
+                    <div class="month-stat">
+                        <span class="month-stat-value" id="month-stat-streak">0</span>
+                        <span class="month-stat-label">Current Streak</span>
+                    </div>
+                </div>
                 <div class="calendar-tooltip" id="calendar-tooltip" role="tooltip" aria-hidden="true"></div>
             </section>
 
@@ -335,6 +353,20 @@
                 </div>
                 <button type="submit" class="btn btn-primary">Generate Report</button>
             </form>
+        </div>
+    </div>
+
+    <!-- Calendar Day Detail Modal -->
+    <div id="day-detail-modal" class="modal">
+        <div class="modal-content day-detail-modal-content">
+            <span class="close" id="close-day-detail">&times;</span>
+            <h2 id="day-detail-title">Day Detail</h2>
+            <div id="day-detail-body">
+                <!-- Day details populated here -->
+            </div>
+            <div class="day-detail-actions">
+                <button class="btn btn-primary" id="day-detail-edit">Edit in Daily Log</button>
+            </div>
         </div>
     </div>
 

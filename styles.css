@@ -1308,6 +1308,19 @@ header h1 {
         font-size: 0.8em;
     }
 
+    .calendar-month-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .month-stat {
+        padding: 8px;
+    }
+
+    .month-stat-value {
+        font-size: 1.2em;
+    }
+
     .history-item {
         padding: 10px;
         gap: 8px;
@@ -1581,6 +1594,35 @@ h3 {
 
 .legend-marker.no-data {
     background: var(--bg-tertiary);
+}
+
+.calendar-month-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.month-stat {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+}
+
+.month-stat-value {
+    display: block;
+    font-size: 1.5em;
+    font-weight: 700;
+    color: var(--accent-primary);
+    margin-bottom: 4px;
+}
+
+.month-stat-label {
+    display: block;
+    font-size: 0.8em;
+    color: var(--text-secondary);
 }
 
 .calendar-tooltip {
@@ -2052,6 +2094,100 @@ h3 {
 
 .report-modal-content {
     max-width: 520px;
+}
+
+.day-detail-modal-content {
+    max-width: 520px;
+}
+
+.day-detail-summary {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    padding: 12px;
+    background: var(--bg-tertiary);
+    border-radius: 10px;
+}
+
+.day-detail-summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.day-detail-summary-label {
+    font-size: 0.75em;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.day-detail-summary-value {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.day-detail-session {
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.day-detail-session:last-of-type {
+    border-bottom: none;
+}
+
+.day-detail-session-title {
+    font-size: 1em;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+}
+
+.day-detail-exercise {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--border-color);
+}
+
+.day-detail-exercise:last-child {
+    border-bottom: none;
+}
+
+.day-detail-exercise-status {
+    font-size: 1.1em;
+    min-width: 24px;
+    text-align: center;
+}
+
+.day-detail-exercise-name {
+    flex: 1;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.day-detail-exercise-meta {
+    font-size: 0.85em;
+    color: var(--text-secondary);
+    text-align: right;
+}
+
+.day-detail-empty {
+    color: var(--text-secondary);
+    font-style: italic;
+    text-align: center;
+    padding: 20px;
+}
+
+.day-detail-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
 }
 
 .report-options .checkbox-group {
