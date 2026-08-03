@@ -535,6 +535,7 @@ function loadData() {
 
     if (storedSwellingLogs) {
         swellingLogs = JSON.parse(storedSwellingLogs);
+        normalizeSwellingLogs();
     }
 
     if (storedMilestones) {
@@ -570,6 +571,36 @@ function saveSwellingLogs() {
     localStorage.setItem(getStorageKey('ptSwellingLogs'), JSON.stringify(swellingLogs));
 }
 
+function normalizeSwellingLogs() {
+    const knownTimes = ['morning', 'afternoon', 'evening'];
+    Object.keys(swellingLogs).forEach(date => {
+        const entry = swellingLogs[date];
+        if (!entry || typeof entry !== 'object') {
+            return;
+        }
+        const hasKnownTime = knownTimes.some(t => entry[t] && typeof entry[t] === 'object');
+        if (hasKnownTime) {
+            return;
+        }
+        const time = (typeof entry.time === 'string' ? entry.time : 'morning');
+        const migrated = { ...entry, time };
+        swellingLogs[date] = { [time]: migrated };
+    });
+}
+
+function getSwellingLevelForDate(date) {
+    const dayLogs = swellingLogs[date];
+    if (!dayLogs) return null;
+    const timeOrder = ['morning', 'afternoon', 'evening'];
+    for (let i = timeOrder.length - 1; i >= 0; i--) {
+        const entry = dayLogs[timeOrder[i]];
+        if (entry && entry.level != null) {
+            return entry.level;
+        }
+    }
+    return null;
+}
+
 function saveMilestones() {
     localStorage.setItem(getStorageKey('ptMilestones'), JSON.stringify(milestones));
 }
@@ -589,6 +620,9 @@ function setupEventListeners() {
     // Date change
     document.getElementById('log-date').addEventListener('change', renderDailyExercises);
     document.getElementById('log-date').addEventListener('change', renderSwellingLog);
+
+    // Swelling time change
+    document.getElementById('swelling-time').addEventListener('change', renderSwellingLog);
 
     // Save swelling log
     document.getElementById('save-swelling').addEventListener('click', saveSwellingLog);
@@ -653,6 +687,16 @@ function setupEventListeners() {
         e.preventDefault();
         generateReport();
     });
+
+    // Collapse/expand daily log cards and swelling panel
+    document.body.addEventListener('click', function(e) {
+        const btn = e.target.closest('.collapse-btn');
+        if (!btn) return;
+        const card = btn.closest('.exercise-card, .swelling-panel');
+        if (card) {
+            card.classList.toggle('collapsed');
+        }
+    });
 }
 
 function switchTab(tabName) {
@@ -712,12 +756,15 @@ function renderDailyExercises() {
     }
 
     container.innerHTML = activeExercises.map(exercise => {
-        const logData = dailyLogs[selectedDate]?.sessions?.[sessionName]?.[exercise.id] || {};
+        const existingLog = dailyLogs[selectedDate]?.sessions?.[sessionName]?.[exercise.id] || {};
+        const lastValues = getLastExerciseValues(exercise.id);
+        const logData = { ...lastValues, ...existingLog };
         
         return `
-            <div class="exercise-card" data-exercise-id="${exercise.id}">
+            <div class="exercise-card collapsed" data-exercise-id="${exercise.id}">
                 <div class="exercise-header">
                     <h3 class="exercise-title">${exercise.name}</h3>
+                    <button class="collapse-btn" type="button" aria-label="Toggle exercise details" title="Collapse/expand">▼</button>
                 </div>
                 <p class="exercise-description">${exercise.description}</p>
                 
@@ -794,14 +841,43 @@ function renderDailyExercises() {
     setupTimerButtons();
 }
 
+function getLastExerciseValues(exerciseId) {
+    const dates = Object.keys(dailyLogs).sort().reverse();
+    for (const date of dates) {
+        const dayLog = dailyLogs[date];
+        if (!dayLog) continue;
+        const sessions = dayLog.sessions || { 'Default Session': dayLog };
+        for (const sessionName of Object.keys(sessions)) {
+            const exerciseData = sessions[sessionName]?.[exerciseId];
+            if (!exerciseData) continue;
+            const hasValues = exerciseData.reps != null ||
+                exerciseData.weight != null ||
+                exerciseData.pain != null ||
+                exerciseData.difficulty != null ||
+                exerciseData.notes;
+            if (hasValues) {
+                return {
+                    reps: exerciseData.reps ?? '',
+                    weight: exerciseData.weight ?? '',
+                    pain: exerciseData.pain ?? '',
+                    difficulty: exerciseData.difficulty ?? '',
+                    notes: exerciseData.notes || ''
+                };
+            }
+        }
+    }
+    return {};
+}
+
 function renderSwellingLog() {
     const selectedDate = document.getElementById('log-date').value;
-    const swelling = swellingLogs[selectedDate] || {};
+    const time = document.getElementById('swelling-time').value;
+    const dayLogs = swellingLogs[selectedDate] || {};
+    const swelling = dayLogs[time] || {};
 
     document.getElementById('swelling-level').value = swelling.level ?? '';
     document.getElementById('swelling-location').value = swelling.location || '';
     document.getElementById('swelling-circumference').value = swelling.circumference ?? '';
-    document.getElementById('swelling-time').value = swelling.time || 'morning';
     document.getElementById('swelling-notes').value = swelling.notes || '';
 }
 
@@ -818,7 +894,10 @@ function saveSwellingLog() {
     const time = document.getElementById('swelling-time').value;
     const notes = document.getElementById('swelling-notes').value;
 
-    swellingLogs[selectedDate] = {
+    if (!swellingLogs[selectedDate]) {
+        swellingLogs[selectedDate] = {};
+    }
+    swellingLogs[selectedDate][time] = {
         level: level ? parseInt(level) : null,
         location,
         circumference: circumference ? parseFloat(circumference) : null,
@@ -1127,8 +1206,9 @@ function renderHistory(dates) {
             });
         } else {
             // Old data structure for backward compatibility
-            totalExercises = Object.keys(dayLog).length;
-            completedExercises = Object.values(dayLog).filter(log => log.completed).length;
+            const exerciseEntries = Object.entries(dayLog).filter(([key, log]) => key !== 'sessions' && log && typeof log === 'object');
+            totalExercises = exerciseEntries.length;
+            completedExercises = exerciseEntries.filter(([key, log]) => log.completed).length;
         }
 
         const completionRate = totalExercises > 0 ? Math.round((completedExercises / totalExercises) * 100) : 0;
@@ -1602,7 +1682,7 @@ function updateSwellingChart(dates) {
     });
 
     const swellingData = recentDates.map(date => {
-        const level = swellingLogs[date]?.level;
+        const level = getSwellingLevelForDate(date);
         return (level !== null && level !== undefined) ? level : null;
     });
 
@@ -1824,6 +1904,7 @@ function importData(event) {
 
                 if (data.swellingLogs) {
                     swellingLogs = data.swellingLogs;
+                    normalizeSwellingLogs();
                     saveSwellingLogs();
                 }
 
@@ -2316,8 +2397,9 @@ function renderCalendar() {
                 });
             } else {
                 // Old data structure for backward compatibility
-                totalExercises = Object.keys(dayLog).length;
-                completedExercises = Object.values(dayLog).filter(log => log.completed).length;
+                const exerciseEntries = Object.entries(dayLog).filter(([key, log]) => key !== 'sessions' && log && typeof log === 'object');
+                totalExercises = exerciseEntries.length;
+                completedExercises = exerciseEntries.filter(([key, log]) => log.completed).length;
             }
 
             if (completedExercises === totalExercises && totalExercises > 0) {
@@ -2366,51 +2448,67 @@ function getCalendarDayTooltip(dateStr) {
     const dayLog = dailyLogs[dateStr];
     const dateLabel = new Date(`${dateStr}T00:00:00`).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
-    if (!dayLog) {
-        return `<div class="tooltip-title">${dateLabel}</div><div class="tooltip-empty">No exercises logged.</div>`;
-    }
-
     let totalExercises = 0;
     let completedExercises = 0;
     let sessionsHtml = '';
 
-    if (dayLog.sessions && Object.keys(dayLog.sessions).length > 0) {
-        sessionsHtml = Object.entries(dayLog.sessions).map(([sessionName, sessionData]) => {
-            const exerciseEntries = Object.entries(sessionData);
-            if (exerciseEntries.length === 0) return '';
-            const exerciseList = exerciseEntries.map(([exerciseId, exerciseData]) => {
-                totalExercises++;
-                if (exerciseData.completed) completedExercises++;
-                const exerciseName = getExerciseName(exerciseData, exerciseId);
-                const statusIcon = exerciseData.completed ? '✓' : '○';
-                return `<div class="tooltip-exercise"><span class="tooltip-status ${exerciseData.completed ? 'complete' : 'incomplete'}">${statusIcon}</span> ${escapeHtml(exerciseName)}</div>`;
+    if (dayLog) {
+        if (dayLog.sessions && Object.keys(dayLog.sessions).length > 0) {
+            sessionsHtml = Object.entries(dayLog.sessions).map(([sessionName, sessionData]) => {
+                const exerciseEntries = Object.entries(sessionData);
+                if (exerciseEntries.length === 0) return '';
+                const exerciseList = exerciseEntries.map(([exerciseId, exerciseData]) => {
+                    totalExercises++;
+                    if (exerciseData.completed) completedExercises++;
+                    const exerciseName = getExerciseName(exerciseData, exerciseId);
+                    const statusIcon = exerciseData.completed ? '✓' : '○';
+                    return `<div class="tooltip-exercise"><span class="tooltip-status ${exerciseData.completed ? 'complete' : 'incomplete'}">${statusIcon}</span> ${escapeHtml(exerciseName)}</div>`;
+                }).join('');
+                return `<div class="tooltip-session"><div class="tooltip-session-name">${escapeHtml(sessionName)}</div>${exerciseList}</div>`;
             }).join('');
-            return `<div class="tooltip-session"><div class="tooltip-session-name">${escapeHtml(sessionName)}</div>${exerciseList}</div>`;
-        }).join('');
-    } else {
-        // Old data structure for backward compatibility
-        const exerciseEntries = Object.entries(dayLog);
-        if (exerciseEntries.length === 0) {
-            return `<div class="tooltip-title">${dateLabel}</div><div class="tooltip-empty">No exercises logged.</div>`;
+        } else {
+            // Old data structure for backward compatibility
+            const exerciseEntries = Object.entries(dayLog);
+            sessionsHtml = exerciseEntries.map(([exerciseId, log]) => {
+                totalExercises++;
+                if (log.completed) completedExercises++;
+                const exerciseName = getExerciseName(log, exerciseId);
+                const statusIcon = log.completed ? '✓' : '○';
+                return `<div class="tooltip-exercise"><span class="tooltip-status ${log.completed ? 'complete' : 'incomplete'}">${statusIcon}</span> ${escapeHtml(exerciseName)}</div>`;
+            }).join('');
         }
-        sessionsHtml = exerciseEntries.map(([exerciseId, log]) => {
-            totalExercises++;
-            if (log.completed) completedExercises++;
-            const exerciseName = getExerciseName(log, exerciseId);
-            const statusIcon = log.completed ? '✓' : '○';
-            return `<div class="tooltip-exercise"><span class="tooltip-status ${log.completed ? 'complete' : 'incomplete'}">${statusIcon}</span> ${escapeHtml(exerciseName)}</div>`;
-        }).join('');
     }
 
-    if (totalExercises === 0) {
-        return `<div class="tooltip-title">${dateLabel}</div><div class="tooltip-empty">No exercises logged.</div>`;
+    let swellingHtml = '';
+    const daySwelling = swellingLogs[dateStr];
+    if (daySwelling) {
+        const entries = Object.entries(daySwelling).filter(([time, swelling]) => {
+            return swelling && (swelling.level != null || swelling.location || swelling.circumference != null || swelling.notes);
+        });
+        if (entries.length > 0) {
+            const swellingList = entries.map(([time, swelling]) => {
+                const details = [];
+                if (swelling.level != null) details.push(`level ${swelling.level}/10`);
+                if (swelling.location) details.push(swelling.location);
+                if (swelling.circumference != null) details.push(`${swelling.circumference} in`);
+                if (swelling.notes) details.push(swelling.notes);
+                const detailString = details.length ? ` — ${escapeHtml(details.join(', '))}` : '';
+                return `<div class="tooltip-exercise">${escapeHtml(time)}${detailString}</div>`;
+            }).join('');
+            swellingHtml = `<div class="tooltip-session"><div class="tooltip-session-name">Swelling</div>${swellingList}</div>`;
+        }
     }
 
-    const summary = `${completedExercises}/${totalExercises} completed`;
+    if (totalExercises === 0 && !swellingHtml) {
+        return `<div class="tooltip-title">${dateLabel}</div><div class="tooltip-empty">No exercises or swelling logged.</div>`;
+    }
+
+    const summary = totalExercises > 0 ? `<div class="tooltip-summary">${completedExercises}/${totalExercises} completed</div>` : '';
     return `
         <div class="tooltip-title">${dateLabel}</div>
-        <div class="tooltip-summary">${summary}</div>
+        ${summary}
         ${sessionsHtml}
+        ${swellingHtml}
     `;
 }
 
@@ -2461,8 +2559,9 @@ function updateCalendarMonthStats(year, month) {
                 });
             });
         } else {
-            dayTotal = Object.keys(dayLog).length;
-            dayCompleted = Object.values(dayLog).filter(log => log.completed).length;
+            const exerciseEntries = Object.entries(dayLog).filter(([key, log]) => key !== 'sessions' && log && typeof log === 'object');
+            dayTotal = exerciseEntries.length;
+            dayCompleted = exerciseEntries.filter(([key, log]) => log.completed).length;
         }
 
         if (dayTotal > 0) daysLogged++;
@@ -2521,13 +2620,11 @@ function openCalendarDayModal(dateStr) {
     title.textContent = dateLabel;
 
     const dayLog = dailyLogs[dateStr];
-    if (!dayLog) {
-        body.innerHTML = '<div class="day-detail-empty">No exercises logged for this day.</div>';
-    } else {
-        let totalExercises = 0;
-        let completedExercises = 0;
-        let sessionsHtml = '';
+    let totalExercises = 0;
+    let completedExercises = 0;
+    let sessionsHtml = '';
 
+    if (dayLog) {
         if (dayLog.sessions && Object.keys(dayLog.sessions).length > 0) {
             sessionsHtml = Object.entries(dayLog.sessions).map(([sessionName, sessionData]) => {
                 const exerciseEntries = Object.entries(sessionData);
@@ -2574,12 +2671,45 @@ function openCalendarDayModal(dateStr) {
                 `;
             }).join('');
         }
+    }
 
-        if (totalExercises === 0) {
-            body.innerHTML = '<div class="day-detail-empty">No exercises logged for this day.</div>';
-        } else {
+    let swellingHtml = '';
+    const daySwelling = swellingLogs[dateStr];
+    if (daySwelling) {
+        const entries = Object.entries(daySwelling).filter(([time, swelling]) => {
+            return swelling && (swelling.level != null || swelling.location || swelling.circumference != null || swelling.notes);
+        });
+        if (entries.length > 0) {
+            const swellingList = entries.map(([time, swelling]) => {
+                const details = [];
+                if (swelling.level != null) details.push(`level ${swelling.level}/10`);
+                if (swelling.location) details.push(swelling.location);
+                if (swelling.circumference != null) details.push(`${swelling.circumference} in`);
+                if (swelling.notes) details.push(swelling.notes);
+                const detailString = details.length ? `<span class="day-detail-exercise-meta">${escapeHtml(details.join(' • '))}</span>` : '';
+                return `
+                    <div class="day-detail-exercise">
+                        <span class="day-detail-exercise-name">${escapeHtml(time)}</span>
+                        ${detailString}
+                    </div>
+                `;
+            }).join('');
+            swellingHtml = `
+                <div class="day-detail-session">
+                    <div class="day-detail-session-title">Swelling</div>
+                    ${swellingList}
+                </div>
+            `;
+        }
+    }
+
+    if (totalExercises === 0 && !swellingHtml) {
+        body.innerHTML = '<div class="day-detail-empty">No exercises or swelling logged for this day.</div>';
+    } else {
+        let summaryHtml = '';
+        if (totalExercises > 0) {
             const completionRate = Math.round((completedExercises / totalExercises) * 100);
-            body.innerHTML = `
+            summaryHtml = `
                 <div class="day-detail-summary">
                     <div class="day-detail-summary-item">
                         <span class="day-detail-summary-label">Exercises</span>
@@ -2594,9 +2724,9 @@ function openCalendarDayModal(dateStr) {
                         <span class="day-detail-summary-value">${completionRate}%</span>
                     </div>
                 </div>
-                ${sessionsHtml}
             `;
         }
+        body.innerHTML = `${summaryHtml}${sessionsHtml}${swellingHtml}`;
     }
 
     editBtn.onclick = () => {
@@ -2770,28 +2900,40 @@ function generateReport() {
             `);
         });
 
-        const swelling = swellingLogs[dateStr];
-        if (includeSwelling && swelling && (swelling.level != null || swelling.location || swelling.circumference != null || swelling.notes)) {
-            if (swelling.level != null) {
-                swellingSum += swelling.level;
-                swellingCount++;
+        const daySwelling = swellingLogs[dateStr];
+        if (includeSwelling && daySwelling) {
+            const visibleEntries = Object.entries(daySwelling).filter(([time, swelling]) => {
+                return swelling && (swelling.level != null || swelling.location || swelling.circumference != null || swelling.notes);
+            });
+
+            if (visibleEntries.length > 0) {
+                const swellingHtmlEntries = [];
+                visibleEntries.forEach(([time, swelling]) => {
+                    if (swelling.level != null) {
+                        swellingSum += swelling.level;
+                        swellingCount++;
+                    }
+
+                    const swellingDetails = [];
+                    if (swelling.level != null) swellingDetails.push(`level ${swelling.level}/10`);
+                    if (swelling.location) swellingDetails.push(swelling.location);
+                    if (swelling.circumference != null) swellingDetails.push(`${swelling.circumference} in`);
+                    if (swelling.notes) swellingDetails.push(`notes: ${swelling.notes}`);
+
+                    const detailString = swellingDetails.length ? ` — ${escapeHtml(swellingDetails.join(', '))}` : '';
+                    swellingHtmlEntries.push(`<li class="report-exercise"><strong>${escapeHtml(time)}</strong>${detailString}</li>`);
+
+                    textLines.push(`  Swelling (${time}): ${swellingDetails.join(', ')}`);
+                });
+
+                dayHtml.push(`
+                    <div class="report-session">
+                        <div class="session-title">Swelling</div>
+                        <ul class="report-exercises">${swellingHtmlEntries.join('')}</ul>
+                    </div>
+                `);
+                hasVisibleSession = true;
             }
-
-            const swellingDetails = [];
-            if (swelling.level != null) swellingDetails.push(`level ${swelling.level}/10`);
-            if (swelling.location) swellingDetails.push(swelling.location);
-            if (swelling.circumference != null) swellingDetails.push(`${swelling.circumference} in`);
-            if (swelling.time) swellingDetails.push(swelling.time);
-            if (swelling.notes) swellingDetails.push(`notes: ${swelling.notes}`);
-
-            dayHtml.push(`
-                <div class="report-session">
-                    <div class="session-title">Swelling</div>
-                    <ul class="report-exercises"><li class="report-exercise">${escapeHtml(swellingDetails.join(', '))}</li></ul>
-                </div>
-            `);
-            textLines.push(`  Swelling: ${swellingDetails.join(', ')}`);
-            hasVisibleSession = true;
         }
 
         if (hasVisibleSession) {
