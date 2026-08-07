@@ -45,7 +45,7 @@ const defaultExercises = [
         weight: "",
         metadata: {
             created: "2026-07-30",
-            modified: "2026-07-30",
+            modified: "2026-08-07",
             version: 1,
             isActive: true
         }
@@ -53,14 +53,14 @@ const defaultExercises = [
     {
         id: 4,
         name: "BIG: Standing Hip Abduction",
-        description: "Stand upright while holding onto a stable surface for support (kitchen sink works well). Slowly move the working leg out to the side while keeping the trunk upright and the pelvis level. Return to the starting position with control and repeat. Don't need ankle weights, but can for added difficulty. Moving slow and steady, no leaning. The less dependent you are on your hold, making you balance more with your legs the better.",
+        description: "Stand upright while holding onto a stable surface for support (kitchen sink works well). Slowly move the working leg out to the side while keeping the trunk upright and the pelvis level. Return to the starting position with control and repeat. Ankle weights are not always needed, but can be used for added difficulty. Move slow and steady, no leaning. The less dependent you are on your hold, the more you will balance with your legs.",
         reps: 20,
         hold: "3-5 seconds",
         frequency: "1-2 times a day",
-        weight: "3-5 lbs (optional)",
+        weight: "3-5 lbs",
         metadata: {
             created: "2026-07-30",
-            modified: "2026-07-30",
+            modified: "2026-08-07",
             version: 1,
             isActive: true
         }
@@ -75,7 +75,7 @@ const defaultExercises = [
         weight: "",
         metadata: {
             created: "2026-07-30",
-            modified: "2026-07-30",
+            modified: "2026-08-07",
             version: 1,
             isActive: true
         }
@@ -90,7 +90,7 @@ const defaultExercises = [
         weight: "",
         metadata: {
             created: "2026-07-30",
-            modified: "2026-07-30",
+            modified: "2026-08-07",
             version: 1,
             isActive: true
         }
@@ -100,12 +100,42 @@ const defaultExercises = [
         name: "BIG: Toe and Heel Raises",
         description: "Stand tall while lightly holding onto a stable surface for balance. The kitchen sink is a good place to hold on to. Do not fall backwards when raising your toes. Heel raises: lift your heels off the ground, rising up onto the balls of your feet. Hold briefly, then lower slowly. Toe raises: lift your toes and the front of your foot while keeping your heels on the ground. Hold briefly, then lower with control. Repeat in a smooth, controlled motion without leaning forward or backward.",
         reps: 20,
-        hold: "1 second",
+        hold: "pause for a second while on your toes and when on your heels",
         frequency: "2-3 times per day",
         weight: "",
         metadata: {
             created: "2026-07-30",
-            modified: "2026-07-30",
+            modified: "2026-08-07",
+            version: 1,
+            isActive: true
+        }
+    },
+    {
+        id: 8,
+        name: "BIG: Cross Drill Tandem",
+        description: "Stand in a tandem stance (one foot directly in front of the other) on a foam pad. Hold a lightweight medicine ball (or similar object) at chest height. Maintain a tall posture, core engaged, and eyes forward. Slowly raise the ball up and diagonally across your body, extending your arms overhead in a controlled cross-body pattern. Return to the starting position without losing balance. Keep your lower body steady and avoid twisting excessively through the hips or trunk. Repeat for the prescribed number of repetitions, then switch tandem foot position to challenge both sides equally.",
+        reps: "10 each stance",
+        hold: "5-10 seconds",
+        frequency: "2-3 times per day",
+        weight: "",
+        metadata: {
+            created: "2026-08-07",
+            modified: "2026-08-07",
+            version: 1,
+            isActive: true
+        }
+    },
+    {
+        id: 9,
+        name: "BIG: Single Leg RDL's",
+        description: "Stand on one leg with a soft bend in your knee. Keep your back straight and your core muscles engaged. Slowly hinge forward at your hips, allowing your opposite leg to extend straight behind you as a counterbalance. Your torso and lifted leg should move together, staying in a straight line from your head to your heel. Reach your hand toward the floor or toward your shin while keeping your hips level and avoiding twisting or rounding your back. Move only as far as you can while maintaining good balance and control. Then tighten your glutes and hamstrings to return to the upright position. Perform the motion slowly and steadily.",
+        reps: "20 each side",
+        hold: "2-3 seconds",
+        frequency: "2-3 times per day",
+        weight: "",
+        metadata: {
+            created: "2026-08-07",
+            modified: "2026-08-07",
             version: 1,
             isActive: true
         }
@@ -225,32 +255,46 @@ function checkForExerciseUpdates() {
     const updates = {
         newExercises: [],
         modifiedExercises: [],
-        removedExercises: [],
         unchangedExercises: []
     };
 
-    // Check for new or modified exercises
+    // Check for new or modified exercises, avoiding duplicates by ID or name
     defaultExercises.forEach(defaultExercise => {
-        const existingExercise = exercises.find(ex => ex.id === defaultExercise.id);
+        const existingById = exercises.find(ex => ex.id === defaultExercise.id);
+        const existingByName = !existingById ? exercises.find(
+            ex => ex.name && defaultExercise.name &&
+                  ex.name.toLowerCase().trim() === defaultExercise.name.toLowerCase().trim()
+        ) : null;
+        const existingExercise = existingById || existingByName;
 
         if (!existingExercise) {
             // New exercise
             updates.newExercises.push(defaultExercise);
         } else {
-            // Check if modified
+            // Merge with the existing exercise to preserve its ID and active state
+            const mergedExercise = {
+                ...defaultExercise,
+                id: existingExercise.id,
+                metadata: {
+                    ...(defaultExercise.metadata || {}),
+                    created: existingExercise.metadata?.created || defaultExercise.metadata?.created,
+                    isActive: existingExercise.metadata?.isActive !== false
+                }
+            };
+
             const isModified = (
-                existingExercise.name !== defaultExercise.name ||
-                existingExercise.description !== defaultExercise.description ||
-                existingExercise.reps !== defaultExercise.reps ||
-                existingExercise.hold !== defaultExercise.hold ||
-                existingExercise.frequency !== defaultExercise.frequency ||
-                existingExercise.weight !== defaultExercise.weight
+                existingExercise.name !== mergedExercise.name ||
+                existingExercise.description !== mergedExercise.description ||
+                existingExercise.reps !== mergedExercise.reps ||
+                existingExercise.hold !== mergedExercise.hold ||
+                existingExercise.frequency !== mergedExercise.frequency ||
+                existingExercise.weight !== mergedExercise.weight
             );
 
             if (isModified) {
                 updates.modifiedExercises.push({
                     existing: existingExercise,
-                    updated: defaultExercise
+                    updated: mergedExercise
                 });
             } else {
                 updates.unchangedExercises.push(existingExercise);
@@ -258,16 +302,10 @@ function checkForExerciseUpdates() {
         }
     });
 
-    // Check for removed exercises
-    exercises.forEach(existingExercise => {
-        const stillInDefault = defaultExercises.find(def => def.id === existingExercise.id);
-        if (!stillInDefault && existingExercise.metadata?.isActive !== false) {
-            updates.removedExercises.push(existingExercise);
-        }
-    });
+    // No automatic archiving. Users activate/inactivate exercises manually.
 
     // If there are updates, store them and show confirmation dialog
-    if (updates.newExercises.length > 0 || updates.modifiedExercises.length > 0 || updates.removedExercises.length > 0) {
+    if (updates.newExercises.length > 0 || updates.modifiedExercises.length > 0) {
         pendingExerciseUpdates = updates;
         showExerciseUpdateDialog(updates);
     }
@@ -305,16 +343,7 @@ function showExerciseUpdateDialog(updates) {
             </div>
             ` : ''}
 
-            ${updates.removedExercises.length > 0 ? `
-            <div class="update-section">
-                <h3>Archived Exercises:</h3>
-                <ul>
-                    ${updates.removedExercises.map(ex => `<li>${ex.name}</li>`).join('')}
-                </ul>
-            </div>
-            ` : ''}
-
-            <p class="update-note">Your historical data will be preserved.</p>
+            <p class="update-note">No exercises will be removed. You can activate or inactivate exercises on the Manage Exercises tab.</p>
 
             <div class="update-dialog-buttons">
                 <button class="btn btn-primary" id="apply-updates">Apply Changes</button>
@@ -366,13 +395,7 @@ function showDetailedUpdateInfo(updates) {
         });
     }
 
-    if (updates.removedExercises.length > 0) {
-        details += "\n\nARCHIVED EXERCISES:\n";
-        updates.removedExercises.forEach(ex => {
-            details += `\n${ex.name}\n`;
-            details += `  Will be archived but historical data preserved\n`;
-        });
-    }
+    details += "\n\nNo exercises will be removed.";
 
     alert(details);
 }
@@ -409,17 +432,7 @@ function applyExerciseUpdates(updates) {
         }
     });
 
-    // Archive removed exercises (soft delete)
-    updates.removedExercises.forEach(removedExercise => {
-        const existingIndex = exercises.findIndex(ex => ex.id === removedExercise.id);
-        if (existingIndex !== -1) {
-            exercises[existingIndex].metadata = {
-                ...exercises[existingIndex].metadata,
-                isActive: false,
-                archived: today
-            };
-        }
-    });
+    // No automatic archiving. Users manage active/inactive state on the Manage Exercises tab.
 
     // Save updated exercises
     saveExercises();
@@ -918,74 +931,48 @@ function renderManageExercises() {
         return;
     }
 
-    const activeExercises = exercises.filter(ex => ex.metadata?.isActive !== false);
-    const archivedExercises = exercises.filter(ex => ex.metadata?.isActive === false);
+    // Show all exercises; inactive ones appear at the bottom with a visual style
+    const sortedExercises = [...exercises].sort((a, b) => {
+        const aInactive = a.metadata?.isActive === false ? 1 : 0;
+        const bInactive = b.metadata?.isActive === false ? 1 : 0;
+        return aInactive - bInactive;
+    });
 
-    let html = '';
-
-    if (activeExercises.length > 0) {
-        html += '<h3>Active Exercises</h3>';
-        html += activeExercises.map(exercise => `
-            <div class="exercise-card" data-exercise-id="${exercise.id}">
-                <div class="exercise-header">
-                    <h3 class="exercise-title">${exercise.name}</h3>
-                    <div>
-                        <button class="btn btn-edit" onclick="editExercise(${exercise.id})">Edit</button>
-                        <button class="btn btn-danger" onclick="archiveExercise(${exercise.id})">Archive</button>
-                    </div>
-                </div>
-                <p class="exercise-description">${exercise.description}</p>
-
-                <div class="exercise-details">
-                    ${exercise.reps ? `<span class="detail-item"><span class="detail-label">Reps:</span> ${exercise.reps}</span>` : ''}
-                    ${exercise.hold ? `<span class="detail-item"><span class="detail-label">Hold:</span> ${exercise.hold}</span>` : ''}
-                    ${exercise.frequency ? `<span class="detail-item"><span class="detail-label">Frequency:</span> ${exercise.frequency}</span>` : ''}
-                    ${exercise.weight ? `<span class="detail-item"><span class="detail-label">Weight:</span> ${exercise.weight}</span>` : ''}
+    const html = sortedExercises.map(exercise => `
+        <div class="exercise-card ${exercise.metadata?.isActive === false ? 'archived' : ''}" data-exercise-id="${exercise.id}">
+            <div class="exercise-header">
+                <h3 class="exercise-title">${exercise.name}${exercise.metadata?.isActive === false ? ' (Inactive)' : ''}</h3>
+                <div class="exercise-actions">
+                    <button class="btn btn-edit" onclick="editExercise(${exercise.id})">Edit</button>
+                    <label class="switch" title="Toggle active/inactive">
+                        <input type="checkbox" onchange="toggleExerciseActive(${exercise.id})" ${exercise.metadata?.isActive !== false ? 'checked' : ''}>
+                        <span class="slider round"></span>
+                    </label>
                 </div>
             </div>
-        `).join('');
-    }
+            <p class="exercise-description">${exercise.description}</p>
 
-    if (archivedExercises.length > 0) {
-        html += '<h3>Archived Exercises</h3>';
-        html += archivedExercises.map(exercise => `
-            <div class="exercise-card archived" data-exercise-id="${exercise.id}">
-                <div class="exercise-header">
-                    <h3 class="exercise-title">${exercise.name} (Archived)</h3>
-                    <div>
-                        <button class="btn btn-edit" onclick="restoreExercise(${exercise.id})">Restore</button>
-                    </div>
-                </div>
-                <p class="exercise-description">${exercise.description}</p>
-                <p class="archive-date">Archived: ${exercise.metadata?.archived || 'Unknown'}</p>
+            <div class="exercise-details">
+                ${exercise.reps ? `<span class="detail-item"><span class="detail-label">Reps:</span> ${exercise.reps}</span>` : ''}
+                ${exercise.hold ? `<span class="detail-item"><span class="detail-label">Hold:</span> ${exercise.hold}</span>` : ''}
+                ${exercise.frequency ? `<span class="detail-item"><span class="detail-label">Frequency:</span> ${exercise.frequency}</span>` : ''}
+                ${exercise.weight ? `<span class="detail-item"><span class="detail-label">Weight:</span> ${exercise.weight}</span>` : ''}
             </div>
-        `).join('');
-    }
+            ${exercise.metadata?.archived && exercise.metadata?.isActive === false ? `<p class="archive-date">Inactive since: ${exercise.metadata.archived}</p>` : ''}
+        </div>
+    `).join('');
 
     container.innerHTML = html;
 }
 
-function archiveExercise(exerciseId) {
+function toggleExerciseActive(exerciseId) {
     const exercise = exercises.find(ex => ex.id === exerciseId);
     if (exercise) {
+        const newActive = !(exercise.metadata?.isActive !== false);
         exercise.metadata = {
             ...exercise.metadata,
-            isActive: false,
-            archived: new Date().toISOString().split('T')[0]
-        };
-        saveExercises();
-        renderManageExercises();
-        renderDailyExercises();
-    }
-}
-
-function restoreExercise(exerciseId) {
-    const exercise = exercises.find(ex => ex.id === exerciseId);
-    if (exercise) {
-        exercise.metadata = {
-            ...exercise.metadata,
-            isActive: true,
-            archived: null
+            isActive: newActive,
+            archived: newActive ? null : new Date().toISOString().split('T')[0]
         };
         saveExercises();
         renderManageExercises();
