@@ -311,6 +311,8 @@ header h1 {
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
         -ms-overflow-style: none;
+        min-height: 56px;
+        align-items: stretch;
     }
 
     .tabs::-webkit-scrollbar {
@@ -318,10 +320,11 @@ header h1 {
     }
 
     .tab {
-        flex: 0 0 auto;
-        min-width: 44px;
-        padding: 8px 4px;
-        font-size: 0.75em;
+        flex: 1 1 0;
+        min-width: 48px;
+        min-height: 56px;
+        padding: 14px 4px;
+        font-size: 0.85em;
     }
 
     .tab.active {
@@ -338,7 +341,7 @@ header h1 {
     }
 
     .container {
-        padding-bottom: 60px;
+        padding-bottom: 76px;
     }
 }
 
