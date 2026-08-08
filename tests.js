@@ -55,4 +55,20 @@ global.testMode = true;
 assert.strictEqual(PT_STORAGE.getStorageKey('ptExercises'), 'test_ptExercises', 'getStorageKey prefixes test key in test mode');
 global.testMode = originalTestMode;
 
+// Storage helpers
+global.testMode = false;
+assert.strictEqual(PT_STORAGE.getStorageKey('ptExercises'), 'ptExercises', 'getStorageKey returns base key');
+global.testMode = true;
+assert.strictEqual(PT_STORAGE.getStorageKey('ptExercises'), 'test_ptExercises', 'getStorageKey prefixes test key');
+global.testMode = false;
+
+// Utility edge cases
+assert.strictEqual(PT_UTILS.formatDateInput(new Date(2026, 0, 5)), '2026-01-05', 'formatDateInput pads single-digit month and day');
+assert.strictEqual(PT_UTILS.escapeHtml(''), '', 'escapeHtml handles empty string');
+assert.strictEqual(PT_UTILS.escapeHtml(null), '', 'escapeHtml handles null');
+assert.strictEqual(PT_UTILS.parseHoldSeconds('20 reps, hold 5 sec'), 20, 'parseHoldSeconds takes the first number');
+assert.strictEqual(PT_UTILS.parseHoldSeconds('none'), 0, 'parseHoldSeconds returns 0 when no number');
+assert.strictEqual(PT_UTILS.formatTime(0), '0:00', 'formatTime formats zero seconds');
+assert.strictEqual(PT_UTILS.formatTime(3599), '59:59', 'formatTime formats large times');
+
 console.log('All tests passed.');
