@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pt-tracker-v12';
+const CACHE_NAME = 'pt-tracker-v13';
 const CDN_CACHE_NAME = 'pt-cdn-v1';
 const APP_SHELL = [
     '/',
@@ -6,6 +6,7 @@ const APP_SHELL = [
     '/styles.css',
     '/app.js',
     '/reports.js',
+    '/calendar.js',
     '/config.js',
     '/utils.js',
     '/storage.js',
