@@ -264,14 +264,20 @@ header h1 {
     color: var(--text-secondary);
     transition: all 0.3s ease;
     position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
-.tab-full {
+.tab-icon {
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+}
+
+.tab-text {
     display: inline;
-}
-
-.tab-short {
-    display: none;
 }
 
 .tab:hover {
@@ -321,13 +327,11 @@ header h1 {
 
     .tab {
         flex: 1 1 0;
-        min-width: 44px;
-        min-height: 48px;
-        padding: 10px 2px;
-        font-size: clamp(0.7rem, 3.2vw, 0.85rem);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        min-width: 48px;
+        min-height: 52px;
+        padding: 10px 4px;
+        flex-direction: column;
+        gap: 4px;
     }
 
     .tab.active {
@@ -335,12 +339,13 @@ header h1 {
         border-top: 3px solid var(--accent-primary);
     }
 
-    .tab-full {
-        display: none;
+    .tab-icon {
+        width: 22px;
+        height: 22px;
     }
 
-    .tab-short {
-        display: inline;
+    .tab-text {
+        display: none;
     }
 
     .container {

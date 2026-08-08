@@ -14,6 +14,34 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;" aria-hidden="true">
+        <symbol id="icon-daily" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 6L9 17l-5-5"></path>
+        </symbol>
+        <symbol id="icon-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="5" width="18" height="16" rx="2"></rect>
+            <path d="M3 10h18M8 3v4M16 3v4"></path>
+        </symbol>
+        <symbol id="icon-progress" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 18l6-6 4 4 8-10"></path>
+        </symbol>
+        <symbol id="icon-milestones" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4v16"></path>
+            <path d="M4 4h13l-5 5 5 5H4"></path>
+        </symbol>
+        <symbol id="icon-exercises" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7 7h2v10H7zM15 7h2v10h-2zM4 10h16v4H4z"></path>
+        </symbol>
+        <symbol id="icon-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M12 1v3m0 16v3M4.2 4.2l2.1 2.1m11.4 11.4l2.1 2.1M1 12h3m16 0h3M4.2 19.8l2.1-2.1m11.4-11.4l2.1-2.1"></path>
+        </symbol>
+        <symbol id="icon-flowsheet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path>
+            <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"></path>
+        </symbol>
+    </svg>
+
     <div class="container">
         <header>
             <div class="header-content">
@@ -59,13 +87,34 @@
         </header>
 
         <nav class="tabs" role="tablist" aria-label="App sections">
-            <button class="tab active" data-tab="daily" role="tab" aria-selected="true" aria-label="Daily Log"><span class="tab-full">Daily Log</span><span class="tab-short">Day</span></button>
-            <button class="tab" data-tab="calendar" role="tab" aria-selected="false" aria-label="Calendar"><span class="tab-full">Calendar</span><span class="tab-short">Cal</span></button>
-            <button class="tab" data-tab="progress" role="tab" aria-selected="false" aria-label="Progress"><span class="tab-full">Progress</span><span class="tab-short">Prog</span></button>
-            <button class="tab" data-tab="milestones" role="tab" aria-selected="false" aria-label="Return to Play"><span class="tab-full">Return to Play</span><span class="tab-short">Play</span></button>
-            <button class="tab" data-tab="exercises" role="tab" aria-selected="false" aria-label="Manage Exercises"><span class="tab-full">Manage Exercises</span><span class="tab-short">Exer</span></button>
-            <button class="tab" data-tab="settings" role="tab" aria-selected="false" aria-label="Settings"><span class="tab-full">Settings</span><span class="tab-short">Set</span></button>
-            <button class="tab" data-tab="flowsheet" role="tab" aria-selected="false" aria-label="Flowsheet"><span class="tab-full">Flowsheet</span><span class="tab-short">Flow</span></button>
+            <button class="tab active" data-tab="daily" role="tab" aria-selected="true" aria-label="Daily Log">
+                <svg class="tab-icon" aria-hidden="true"><use href="#icon-daily"></use></svg>
+                <span class="tab-text">Daily</span>
+            </button>
+            <button class="tab" data-tab="calendar" role="tab" aria-selected="false" aria-label="Calendar">
+                <svg class="tab-icon" aria-hidden="true"><use href="#icon-calendar"></use></svg>
+                <span class="tab-text">Calendar</span>
+            </button>
+            <button class="tab" data-tab="progress" role="tab" aria-selected="false" aria-label="Progress">
+                <svg class="tab-icon" aria-hidden="true"><use href="#icon-progress"></use></svg>
+                <span class="tab-text">Progress</span>
+            </button>
+            <button class="tab" data-tab="milestones" role="tab" aria-selected="false" aria-label="Return to Play">
+                <svg class="tab-icon" aria-hidden="true"><use href="#icon-milestones"></use></svg>
+                <span class="tab-text">Milestones</span>
+            </button>
+            <button class="tab" data-tab="exercises" role="tab" aria-selected="false" aria-label="Manage Exercises">
+                <svg class="tab-icon" aria-hidden="true"><use href="#icon-exercises"></use></svg>
+                <span class="tab-text">Exercises</span>
+            </button>
+            <button class="tab" data-tab="settings" role="tab" aria-selected="false" aria-label="Settings">
+                <svg class="tab-icon" aria-hidden="true"><use href="#icon-settings"></use></svg>
+                <span class="tab-text">Settings</span>
+            </button>
+            <button class="tab" data-tab="flowsheet" role="tab" aria-selected="false" aria-label="Flowsheet">
+                <svg class="tab-icon" aria-hidden="true"><use href="#icon-flowsheet"></use></svg>
+                <span class="tab-text">Flowsheet</span>
+            </button>
         </nav>
 
         <main>
