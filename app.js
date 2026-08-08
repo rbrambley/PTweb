@@ -275,13 +275,13 @@ function applyExerciseUpdates(updates) {
     pendingExerciseUpdates = null;
 }
 
-function initializeApp() {
+async function initializeApp() {
     // Check for test mode in URL parameter
     const urlParams = new URLSearchParams(window.location.search);
     testMode = urlParams.get('test') === 'true';
 
-    // Load data from localStorage
-    loadData();
+    // Load data from localStorage (or IndexedDB if localStorage is empty)
+    await loadData();
 
     // Prompt for a backup if it has been more than a week
     checkBackupReminder();
@@ -349,12 +349,92 @@ function showTestModeIndicator() {
     document.body.appendChild(indicator);
 }
 
-function loadData() {
+// IndexedDB persistence helpers
+function openDatabase() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open('PTTrackerDB', 1);
+        request.onupgradeneeded = function(e) {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains('appData')) {
+                db.createObjectStore('appData');
+            }
+        };
+        request.onsuccess = function(e) {
+            resolve(e.target.result);
+        };
+        request.onerror = function(e) {
+            reject(e.target.error || e.target);
+        };
+    });
+}
+
+async function loadFromIndexedDB() {
+    if (!('indexedDB' in window)) return null;
+    const storageKey = testMode ? 'testData' : 'current';
+    try {
+        const db = await openDatabase();
+        const tx = db.transaction('appData', 'readonly');
+        const store = tx.objectStore('appData');
+        const data = await new Promise((resolve, reject) => {
+            const request = store.get(storageKey);
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+        return data || null;
+    } catch (err) {
+        console.log('IndexedDB load failed', err);
+        return null;
+    }
+}
+
+async function persistToIndexedDB() {
+    if (!('indexedDB' in window)) return;
+    const storageKey = testMode ? 'testData' : 'current';
+    try {
+        const db = await openDatabase();
+        const tx = db.transaction('appData', 'readwrite');
+        const store = tx.objectStore('appData');
+        const data = {
+            exercises,
+            dailyLogs,
+            swellingLogs,
+            milestones,
+            unlockedBadges,
+            savedAt: new Date().toISOString()
+        };
+        store.put(data, storageKey);
+        await new Promise((resolve, reject) => {
+            tx.oncomplete = resolve;
+            tx.onerror = () => reject(tx.error);
+        });
+    } catch (err) {
+        console.log('IndexedDB persist failed', err);
+    }
+}
+
+async function loadData() {
     const exercisesKey = getStorageKey(PT_CONFIG.storage.exercises);
     const logsKey = getStorageKey(PT_CONFIG.storage.dailyLogs);
     const swellingKey = getStorageKey(PT_CONFIG.storage.swellingLogs);
     const milestonesKey = getStorageKey(PT_CONFIG.storage.milestones);
     const badgesKey = getStorageKey(PT_CONFIG.storage.badges);
+
+    // Restore from IndexedDB if localStorage is empty (e.g. browser reset)
+    const anyStored = localStorage.getItem(exercisesKey) ||
+                      localStorage.getItem(logsKey) ||
+                      localStorage.getItem(swellingKey) ||
+                      localStorage.getItem(milestonesKey) ||
+                      localStorage.getItem(badgesKey);
+    if (!anyStored) {
+        const idbData = await loadFromIndexedDB();
+        if (idbData) {
+            localStorage.setItem(exercisesKey, JSON.stringify(idbData.exercises || []));
+            localStorage.setItem(logsKey, JSON.stringify(idbData.dailyLogs || {}));
+            localStorage.setItem(swellingKey, JSON.stringify(idbData.swellingLogs || {}));
+            localStorage.setItem(milestonesKey, JSON.stringify(idbData.milestones || []));
+            localStorage.setItem(badgesKey, JSON.stringify(idbData.unlockedBadges || []));
+        }
+    }
 
     const storedExercises = localStorage.getItem(exercisesKey);
     const storedLogs = localStorage.getItem(logsKey);
@@ -407,14 +487,17 @@ function loadData() {
 
 function saveExercises() {
     localStorage.setItem(getStorageKey(PT_CONFIG.storage.exercises), JSON.stringify(exercises));
+    persistToIndexedDB();
 }
 
 function saveDailyLogs() {
     localStorage.setItem(getStorageKey(PT_CONFIG.storage.dailyLogs), JSON.stringify(dailyLogs));
+    persistToIndexedDB();
 }
 
 function saveSwellingLogs() {
     localStorage.setItem(getStorageKey(PT_CONFIG.storage.swellingLogs), JSON.stringify(swellingLogs));
+    persistToIndexedDB();
 }
 
 function normalizeSwellingLogs() {
@@ -449,10 +532,12 @@ function getSwellingLevelForDate(date) {
 
 function saveMilestones() {
     localStorage.setItem(getStorageKey(PT_CONFIG.storage.milestones), JSON.stringify(milestones));
+    persistToIndexedDB();
 }
 
 function saveBadges() {
     localStorage.setItem(getStorageKey(PT_CONFIG.storage.badges), JSON.stringify(unlockedBadges));
+    persistToIndexedDB();
 }
 
 function setupEventListeners() {
@@ -529,6 +614,7 @@ function setupEventListeners() {
 
     // Report generation
     document.getElementById('generate-report').addEventListener('click', openReportModal);
+    document.getElementById('weekly-report').addEventListener('click', openWeeklyReport);
     document.getElementById('report-form').addEventListener('submit', function(e) {
         e.preventDefault();
         generateReport();
@@ -551,9 +637,11 @@ function switchTab(tabName) {
     // Update tab buttons
     document.querySelectorAll('.tab').forEach(tab => {
         tab.classList.remove('active');
-        if (tab.dataset.tab === tabName) {
+        const isActive = tab.dataset.tab === tabName;
+        if (isActive) {
             tab.classList.add('active');
         }
+        tab.setAttribute('aria-selected', String(isActive));
     });
     
     // Update tab content
@@ -648,7 +736,7 @@ function renderDailyExercises() {
                             <span class="timer-icon">⏱️</span>
                             <span class="timer-text">Start Timer</span>
                         </button>
-                        <span class="timer-display" id="timer-display-${exercise.id}">0:00</span>
+                        <span class="timer-display" id="timer-display-${exercise.id}" aria-live="polite">0:00</span>
                     </div>
                     ` : ''}
                     
@@ -2256,11 +2344,13 @@ function renderCalendar() {
         
         let dayClass = 'calendar-day';
         let indicator = '';
-        
+        let status = 'no data';
+        const formattedDate = new Date(`${dateStr}T00:00:00`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
         if (dateStr === todayStr) {
             dayClass += ' today';
         }
-        
+
         if (dayLog) {
             let totalExercises = 0;
             let completedExercises = 0;
@@ -2283,14 +2373,22 @@ function renderCalendar() {
             if (completedExercises === totalExercises && totalExercises > 0) {
                 dayClass += ' has-data';
                 indicator = '✓';
+                status = 'all exercises completed';
             } else if (completedExercises > 0) {
                 dayClass += ' partial';
                 indicator = `${completedExercises}/${totalExercises}`;
+                status = `${completedExercises} of ${totalExercises} exercises completed`;
+            } else if (totalExercises > 0) {
+                status = 'exercises logged, none completed';
             }
         }
-        
+
+        if (dateStr === todayStr) {
+            status = `today, ${status}`;
+        }
+
         html += `
-            <div class="${dayClass}" data-date="${dateStr}">
+            <div class="${dayClass}" data-date="${dateStr}" aria-label="${formattedDate}: ${status}" tabindex="0" role="button">
                 <span class="calendar-day-number">${day}</span>
                 ${indicator ? `<span class="calendar-day-indicator">${indicator}</span>` : ''}
             </div>
@@ -2624,6 +2722,22 @@ function openReportModal() {
     document.getElementById('report-start-date').value = formatDateInput(thirtyDaysAgo);
     document.getElementById('report-end-date').value = formatDateInput(today);
     document.getElementById('report-modal').style.display = 'block';
+}
+
+function openWeeklyReport() {
+    const today = new Date();
+    const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    document.getElementById('report-start-date').value = formatDateInput(sevenDaysAgo);
+    document.getElementById('report-end-date').value = formatDateInput(today);
+    document.getElementById('report-modal').style.display = 'block';
+
+    const reportForm = document.getElementById('report-form');
+    if (reportForm.requestSubmit) {
+        reportForm.requestSubmit();
+    } else {
+        reportForm.dispatchEvent(new Event('submit', { cancelable: true }));
+    }
 }
 
 function formatDateInput(date) {

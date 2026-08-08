@@ -58,13 +58,14 @@
             </div>
         </header>
 
-        <nav class="tabs">
-            <button class="tab active" data-tab="daily">Daily Log</button>
-            <button class="tab" data-tab="calendar">Calendar</button>
-            <button class="tab" data-tab="progress">Progress</button>
-            <button class="tab" data-tab="milestones">Return to Play</button>
-            <button class="tab" data-tab="exercises">Manage Exercises</button>
-            <button class="tab" data-tab="settings">Settings</button>
+        <nav class="tabs" role="tablist" aria-label="App sections">
+            <button class="tab active" data-tab="daily" role="tab" aria-selected="true">Daily Log</button>
+            <button class="tab" data-tab="calendar" role="tab" aria-selected="false">Calendar</button>
+            <button class="tab" data-tab="progress" role="tab" aria-selected="false">Progress</button>
+            <button class="tab" data-tab="milestones" role="tab" aria-selected="false">Return to Play</button>
+            <button class="tab" data-tab="exercises" role="tab" aria-selected="false">Manage Exercises</button>
+            <button class="tab" data-tab="settings" role="tab" aria-selected="false">Settings</button>
+            <button class="tab" data-tab="flowsheet" role="tab" aria-selected="false">Flowsheet</button>
         </nav>
 
         <main>
@@ -189,6 +190,7 @@
                 
                 <div class="report-action">
                     <button class="btn btn-primary" id="generate-report">Generate Report</button>
+                    <button class="btn btn-secondary" id="weekly-report">Weekly Report</button>
                 </div>
                 
                 <h3>Weekly Goals</h3>
@@ -319,6 +321,15 @@
                         <button class="btn btn-danger" id="clear-all-data">Clear All Data</button>
                     </div>
                     <p class="setting-description">Permanently delete all your exercise data (cannot be undone)</p>
+                </div>
+            </section>
+
+            <!-- Flowsheet Tab -->
+            <section id="flowsheet-tab" class="tab-content">
+                <h2>PT Flowsheet</h2>
+                <p class="setting-description">Reference the original PT prescription from the flowsheet PDF.</p>
+                <div class="pdf-viewer">
+                    <embed src="Richard%20Brambley_76546070_flowsheet_hep.pdf" type="application/pdf" width="100%" height="100%" title="PT flowsheet PDF" />
                 </div>
             </section>
         </main>

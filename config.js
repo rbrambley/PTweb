@@ -180,3 +180,7 @@ const PT_CONFIG = {
         { id: 'all_milestones', name: 'Return to Play', description: 'Complete all return-to-play milestones', icon: '🥏', check: (data) => data.completedMilestones >= data.totalMilestones }
     ]
 };
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = PT_CONFIG;
+}
