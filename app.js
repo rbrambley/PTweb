@@ -153,22 +153,6 @@ let timers = {};
 let testMode = false;
 
 // Return-to-play milestones
-const defaultMilestones = [
-    { id: 1, text: "Complete 1 week of exercises without pain", completed: false },
-    { id: 2, text: "Achieve pain-free range of motion", completed: false },
-    { id: 3, text: "Complete 2 weeks of exercises consistently", completed: false },
-    { id: 4, text: "Practice putting without discomfort", completed: false },
-    { id: 5, text: "Complete 3 weeks of exercises", completed: false },
-    { id: 6, text: "Light approach throws (150ft or less)", completed: false },
-    { id: 7, text: "Complete 4 weeks of exercises", completed: false },
-    { id: 8, text: "Full driving practice session", completed: false },
-    { id: 9, text: "Complete 5 weeks of exercises", completed: false },
-    { id: 10, text: "Play a practice round", completed: false },
-    { id: 11, text: "Complete 6 weeks of exercises", completed: false },
-    { id: 12, text: "Return to weekly league play", completed: false },
-    { id: 13, text: "Compete in first tournament", completed: false }
-];
-
 let milestones = [];
 
 // Groups milestones into recovery phases for the Return to Play timeline.
@@ -179,22 +163,6 @@ const milestonePhases = [
     { name: 'Weeks 3-4: Building Strength', icon: '💪', minId: 5, maxId: 8 },
     { name: 'Weeks 5-6: Advanced Training', icon: '🚀', minId: 9, maxId: 12 },
     { name: 'Return to Competition', icon: '🏆', minId: 13, maxId: 13 }
-];
-
-// Achievement badges
-const achievementBadges = [
-    { id: 'first_day', name: 'First Steps', description: 'Complete your first day of exercises', icon: '🎯', check: (data) => data.totalDays >= 1 },
-    { id: 'three_day_streak', name: 'Building Momentum', description: 'Achieve a 3-day streak', icon: '🔥', check: (data) => data.currentStreak >= 3 },
-    { id: 'one_week', name: 'Week Warrior', description: 'Complete exercises for 7 days', icon: '📅', check: (data) => data.totalDays >= 7 },
-    { id: 'perfect_week', name: 'Perfect Week', description: '100% completion for a week', icon: '⭐', check: (data) => data.completionRate === 100 && data.totalDays >= 7 },
-    { id: 'two_weeks', name: 'Fortnight Fighter', description: 'Complete exercises for 14 days', icon: '💪', check: (data) => data.totalDays >= 14 },
-    { id: 'milestone_master', name: 'Milestone Master', description: 'Complete 5 return-to-play milestones', icon: '🏆', check: (data) => data.completedMilestones >= 5 },
-    { id: 'three_weeks', name: 'Three Week Strong', description: 'Complete exercises for 21 days', icon: '🏋️', check: (data) => data.totalDays >= 21 },
-    { id: 'pain_free', name: 'Pain Free', description: 'Complete exercises with pain level 2 or lower for a week', icon: '😌', check: (data) => data.lowPainDays >= 7 },
-    { id: 'four_weeks', name: 'Month Master', description: 'Complete exercises for 28 days', icon: '🌟', check: (data) => data.totalDays >= 28 },
-    { id: 'five_weeks', name: 'Five Week Focus', description: 'Complete exercises for 35 days', icon: '🎯', check: (data) => data.totalDays >= 35 },
-    { id: 'six_weeks', name: 'Program Complete', description: 'Complete the 6-week program', icon: '🏅', check: (data) => data.totalDays >= 42 },
-    { id: 'all_milestones', name: 'Return to Play', description: 'Complete all return-to-play milestones', icon: '🥏', check: (data) => data.completedMilestones >= data.totalMilestones }
 ];
 
 let unlockedBadges = [];
@@ -488,12 +456,12 @@ function updateTestModeButtons(isTestMode) {
         toggleButton.textContent = 'Disable Test Mode';
         toggleButton.classList.remove('btn-secondary');
         toggleButton.classList.add('btn-danger');
-        clearButton.style.display = 'inline-block';
+        clearButton.classList.remove('hidden');
     } else {
         toggleButton.textContent = 'Enable Test Mode';
         toggleButton.classList.remove('btn-danger');
         toggleButton.classList.add('btn-secondary');
-        clearButton.style.display = 'none';
+        clearButton.classList.add('hidden');
     }
 }
 
@@ -517,11 +485,11 @@ function showTestModeIndicator() {
 }
 
 function loadData() {
-    const exercisesKey = getStorageKey('ptExercises');
-    const logsKey = getStorageKey('ptDailyLogs');
-    const swellingKey = getStorageKey('ptSwellingLogs');
-    const milestonesKey = getStorageKey('ptMilestones');
-    const badgesKey = getStorageKey('unlockedBadges');
+    const exercisesKey = getStorageKey(PT_CONFIG.storage.exercises);
+    const logsKey = getStorageKey(PT_CONFIG.storage.dailyLogs);
+    const swellingKey = getStorageKey(PT_CONFIG.storage.swellingLogs);
+    const milestonesKey = getStorageKey(PT_CONFIG.storage.milestones);
+    const badgesKey = getStorageKey(PT_CONFIG.storage.badges);
 
     const storedExercises = localStorage.getItem(exercisesKey);
     const storedLogs = localStorage.getItem(logsKey);
@@ -554,7 +522,7 @@ function loadData() {
     if (storedMilestones) {
         milestones = JSON.parse(storedMilestones);
     } else {
-        milestones = [...defaultMilestones];
+        milestones = [...PT_CONFIG.defaultMilestones];
         // In test mode, pre-complete some milestones for demo
         if (testMode) {
             milestones[0].completed = true; // Complete 1 week
@@ -573,15 +541,15 @@ function loadData() {
 }
 
 function saveExercises() {
-    localStorage.setItem(getStorageKey('ptExercises'), JSON.stringify(exercises));
+    localStorage.setItem(getStorageKey(PT_CONFIG.storage.exercises), JSON.stringify(exercises));
 }
 
 function saveDailyLogs() {
-    localStorage.setItem(getStorageKey('ptDailyLogs'), JSON.stringify(dailyLogs));
+    localStorage.setItem(getStorageKey(PT_CONFIG.storage.dailyLogs), JSON.stringify(dailyLogs));
 }
 
 function saveSwellingLogs() {
-    localStorage.setItem(getStorageKey('ptSwellingLogs'), JSON.stringify(swellingLogs));
+    localStorage.setItem(getStorageKey(PT_CONFIG.storage.swellingLogs), JSON.stringify(swellingLogs));
 }
 
 function normalizeSwellingLogs() {
@@ -615,11 +583,11 @@ function getSwellingLevelForDate(date) {
 }
 
 function saveMilestones() {
-    localStorage.setItem(getStorageKey('ptMilestones'), JSON.stringify(milestones));
+    localStorage.setItem(getStorageKey(PT_CONFIG.storage.milestones), JSON.stringify(milestones));
 }
 
 function saveBadges() {
-    localStorage.setItem(getStorageKey('unlockedBadges'), JSON.stringify(unlockedBadges));
+    localStorage.setItem(getStorageKey(PT_CONFIG.storage.badges), JSON.stringify(unlockedBadges));
 }
 
 function setupEventListeners() {
@@ -643,7 +611,7 @@ function setupEventListeners() {
     // Session type change
     document.getElementById('session-type').addEventListener('change', function() {
         const customInput = document.getElementById('custom-session-name');
-        customInput.style.display = this.value === 'custom' ? 'block' : 'none';
+        customInput.classList.toggle('hidden', this.value !== 'custom');
     });
 
     // Save day's progress
@@ -708,6 +676,8 @@ function setupEventListeners() {
         const card = btn.closest('.exercise-card, .swelling-panel');
         if (card) {
             card.classList.toggle('collapsed');
+            const isCollapsed = card.classList.contains('collapsed');
+            btn.setAttribute('aria-expanded', String(!isCollapsed));
         }
     });
 }
@@ -777,7 +747,7 @@ function renderDailyExercises() {
             <div class="exercise-card collapsed" data-exercise-id="${exercise.id}">
                 <div class="exercise-header">
                     <h3 class="exercise-title">${exercise.name}</h3>
-                    <button class="collapse-btn" type="button" aria-label="Toggle exercise details" title="Collapse/expand">▼</button>
+                    <button class="collapse-btn" type="button" aria-label="Toggle exercise details" title="Collapse/expand" aria-expanded="false">▼</button>
                 </div>
                 <p class="exercise-description">${exercise.description}</p>
                 
@@ -1304,7 +1274,7 @@ function handleExerciseFormSubmit(e) {
 
 // Theme management functions
 function initializeTheme() {
-    const savedTheme = localStorage.getItem('theme') || 'system';
+    const savedTheme = localStorage.getItem(PT_CONFIG.storage.theme) || 'system';
     setTheme(savedTheme);
     
     // Set up theme button listeners
@@ -1312,7 +1282,7 @@ function initializeTheme() {
         btn.addEventListener('click', function() {
             const theme = this.dataset.theme;
             setTheme(theme);
-            localStorage.setItem('theme', theme);
+            localStorage.setItem(PT_CONFIG.storage.theme, theme);
         });
     });
 }
@@ -1343,7 +1313,7 @@ function setTheme(theme) {
 
 // Listen for system theme changes when in system mode
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
-    const currentTheme = localStorage.getItem('theme') || 'system';
+    const currentTheme = localStorage.getItem(PT_CONFIG.storage.theme) || 'system';
     if (currentTheme === 'system') {
         if (e.matches) {
             document.documentElement.setAttribute('data-theme', 'dark');
@@ -1745,14 +1715,14 @@ setTheme = function(theme) {
 
 // Reminder functions
 function loadReminderSettings() {
-    const reminderEnabled = localStorage.getItem('remindersEnabled') === 'true';
-    const reminderTime = localStorage.getItem('reminderTime') || '09:00';
+    const reminderEnabled = localStorage.getItem(PT_CONFIG.storage.remindersEnabled) === 'true';
+    const reminderTime = localStorage.getItem(PT_CONFIG.storage.reminderTime) || '09:00';
     
     document.getElementById('reminder-time').value = reminderTime;
     
     if (reminderEnabled) {
-        document.getElementById('enable-reminders').style.display = 'none';
-        document.getElementById('disable-reminders').style.display = 'inline-block';
+        document.getElementById('enable-reminders').classList.add('hidden');
+        document.getElementById('disable-reminders').classList.remove('hidden');
         scheduleReminder(reminderTime);
     }
 }
@@ -1786,18 +1756,18 @@ function disableReminders() {
 }
 
 function setReminderEnabled(enabled, time) {
-    localStorage.setItem('remindersEnabled', enabled);
+    localStorage.setItem(PT_CONFIG.storage.remindersEnabled, enabled);
     if (time) {
-        localStorage.setItem('reminderTime', time);
+        localStorage.setItem(PT_CONFIG.storage.reminderTime, time);
     }
     
     if (enabled) {
-        document.getElementById('enable-reminders').style.display = 'none';
-        document.getElementById('disable-reminders').style.display = 'inline-block';
+        document.getElementById('enable-reminders').classList.add('hidden');
+        document.getElementById('disable-reminders').classList.remove('hidden');
         scheduleReminder(time);
     } else {
-        document.getElementById('enable-reminders').style.display = 'inline-block';
-        document.getElementById('disable-reminders').style.display = 'none';
+        document.getElementById('enable-reminders').classList.remove('hidden');
+        document.getElementById('disable-reminders').classList.add('hidden');
         // Clear existing reminder timeout
         if (window.reminderTimeout) {
             clearTimeout(window.reminderTimeout);
@@ -1934,7 +1904,7 @@ function clearAllData() {
             exercises = [];
             dailyLogs = {};
             swellingLogs = {};
-            milestones = [...defaultMilestones];
+            milestones = [...PT_CONFIG.defaultMilestones];
             unlockedBadges = [];
 
             saveExercises();
@@ -1972,11 +1942,11 @@ function toggleTestMode() {
 function clearTestData() {
     if (confirm('Are you sure you want to clear all test data?')) {
         // Clear test storage keys
-        localStorage.removeItem('test_ptExercises');
-        localStorage.removeItem('test_ptDailyLogs');
-        localStorage.removeItem('test_ptSwellingLogs');
-        localStorage.removeItem('test_ptMilestones');
-        localStorage.removeItem('test_unlockedBadges');
+        localStorage.removeItem(`test_${PT_CONFIG.storage.exercises}`);
+        localStorage.removeItem(`test_${PT_CONFIG.storage.dailyLogs}`);
+        localStorage.removeItem(`test_${PT_CONFIG.storage.swellingLogs}`);
+        localStorage.removeItem(`test_${PT_CONFIG.storage.milestones}`);
+        localStorage.removeItem(`test_${PT_CONFIG.storage.badges}`);
 
         alert('Test data cleared. Reloading...');
         window.location.reload();
@@ -2004,10 +1974,10 @@ function renderMilestones() {
     const nextMilestone = milestones.find(m => !m.completed);
     if (nextUpCard && nextUpText) {
         if (nextMilestone) {
-            nextUpCard.style.display = '';
+            nextUpCard.classList.remove('hidden');
             nextUpText.textContent = nextMilestone.text;
         } else {
-            nextUpCard.style.display = 'none';
+            nextUpCard.classList.add('hidden');
         }
     }
 
@@ -2257,7 +2227,7 @@ function updateAchievements() {
     };
     
     // Check for new badge unlocks
-    achievementBadges.forEach(badge => {
+    PT_CONFIG.achievementBadges.forEach(badge => {
         if (!unlockedBadges.includes(badge.id) && badge.check(achievementData)) {
             unlockedBadges.push(badge.id);
             saveBadges();
@@ -2271,7 +2241,7 @@ function updateAchievements() {
 function renderBadges() {
     const container = document.getElementById('badges-container');
     
-    container.innerHTML = achievementBadges.map(badge => {
+    container.innerHTML = PT_CONFIG.achievementBadges.map(badge => {
         const isUnlocked = unlockedBadges.includes(badge.id);
         return `
             <div class="badge ${isUnlocked ? 'unlocked' : ''}">

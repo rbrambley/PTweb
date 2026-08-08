@@ -303,6 +303,10 @@ header h1 {
     display: block;
 }
 
+.hidden {
+    display: none;
+}
+
 .date-selector {
     margin-bottom: 20px;
     padding: 20px;

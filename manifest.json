@@ -1,0 +1,17 @@
+{
+    "name": "Disc Golf PT Tracker",
+    "short_name": "PT Tracker",
+    "description": "Track physical therapy exercises, swelling, and return-to-play milestones for disc golf recovery.",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#f8f9fa",
+    "theme_color": "#667eea",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "favicon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml"
+        }
+    ]
+}

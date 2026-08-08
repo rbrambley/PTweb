@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#667eea">
     <title>PT Exercise Tracker - Disc Golf Recovery</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="manifest" href="manifest.json">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -81,13 +83,13 @@
                         <option value="evening">Evening</option>
                         <option value="custom">Custom</option>
                     </select>
-                    <input type="text" id="custom-session-name" placeholder="Session name" style="display: none;">
+                    <input type="text" id="custom-session-name" placeholder="Session name" class="hidden">
                 </div>
 
                 <div class="exercise-card swelling-panel collapsed">
                     <div class="exercise-header">
                         <h3 class="exercise-title">Swelling Check-In</h3>
-                        <button class="collapse-btn" type="button" aria-label="Toggle swelling section" title="Collapse/expand">▼</button>
+                        <button class="collapse-btn" type="button" aria-label="Toggle swelling section" title="Collapse/expand" aria-expanded="false">▼</button>
                     </div>
                     <p class="exercise-description">Log swelling once per day (e.g. in the morning before activity) to spot trends early.</p>
                     <div class="tracking-row">
@@ -257,7 +259,7 @@
                     </div>
                 </div>
 
-                <div class="next-up-card" id="next-up-card" style="display: none;">
+                <div class="next-up-card hidden" id="next-up-card">
                     <div class="next-up-label">🎯 Next Up</div>
                     <div class="next-up-text" id="next-up-text"></div>
                 </div>
@@ -287,7 +289,7 @@
                         <label for="reminder-time">Daily Reminder Time:</label>
                         <input type="time" id="reminder-time" value="09:00">
                         <button class="btn btn-primary" id="enable-reminders">Enable Reminders</button>
-                        <button class="btn btn-danger" id="disable-reminders" style="display: none;">Disable Reminders</button>
+                        <button class="btn btn-danger hidden" id="disable-reminders">Disable Reminders</button>
                     </div>
                     <p class="setting-description">Get browser notifications to remind you to do your exercises</p>
                 </div>
@@ -297,7 +299,7 @@
                     <div class="setting-item">
                         <button class="btn btn-secondary" id="export-data">Export Data</button>
                         <button class="btn btn-secondary" id="import-data">Import Data</button>
-                        <input type="file" id="import-file" accept=".json" style="display: none;">
+                        <input type="file" id="import-file" accept=".json" class="hidden">
                     </div>
                     <p class="setting-description">Export your data to backup or import from a previous backup</p>
                 </div>
@@ -306,7 +308,7 @@
                     <h3>Test Mode</h3>
                     <div class="setting-item">
                         <button class="btn btn-secondary" id="toggle-test-mode">Enable Test Mode</button>
-                        <button class="btn btn-danger" id="clear-test-data" style="display: none;">Clear Test Data</button>
+                        <button class="btn btn-danger hidden" id="clear-test-data">Clear Test Data</button>
                     </div>
                     <p class="setting-description">Test mode uses mock data and separate storage to test changes without affecting your real data</p>
                 </div>
@@ -411,6 +413,7 @@
         </div>
     </div>
 
+    <script src="config.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
