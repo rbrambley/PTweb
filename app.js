@@ -76,10 +76,6 @@ function createMockData() {
 }
 
 // Get storage key based on test mode
-function getStorageKey(baseKey) {
-    return testMode ? `test_${baseKey}` : baseKey;
-}
-
 // Exercise update detection system
 function checkForExerciseUpdates() {
     const updates = {
@@ -347,69 +343,6 @@ function showTestModeIndicator() {
     `;
     indicator.textContent = '🧪 TEST MODE';
     document.body.appendChild(indicator);
-}
-
-// IndexedDB persistence helpers
-function openDatabase() {
-    return new Promise((resolve, reject) => {
-        const request = indexedDB.open('PTTrackerDB', 1);
-        request.onupgradeneeded = function(e) {
-            const db = e.target.result;
-            if (!db.objectStoreNames.contains('appData')) {
-                db.createObjectStore('appData');
-            }
-        };
-        request.onsuccess = function(e) {
-            resolve(e.target.result);
-        };
-        request.onerror = function(e) {
-            reject(e.target.error || e.target);
-        };
-    });
-}
-
-async function loadFromIndexedDB() {
-    if (!('indexedDB' in window)) return null;
-    const storageKey = testMode ? 'testData' : 'current';
-    try {
-        const db = await openDatabase();
-        const tx = db.transaction('appData', 'readonly');
-        const store = tx.objectStore('appData');
-        const data = await new Promise((resolve, reject) => {
-            const request = store.get(storageKey);
-            request.onsuccess = () => resolve(request.result);
-            request.onerror = () => reject(request.error);
-        });
-        return data || null;
-    } catch (err) {
-        console.log('IndexedDB load failed', err);
-        return null;
-    }
-}
-
-async function persistToIndexedDB() {
-    if (!('indexedDB' in window)) return;
-    const storageKey = testMode ? 'testData' : 'current';
-    try {
-        const db = await openDatabase();
-        const tx = db.transaction('appData', 'readwrite');
-        const store = tx.objectStore('appData');
-        const data = {
-            exercises,
-            dailyLogs,
-            swellingLogs,
-            milestones,
-            unlockedBadges,
-            savedAt: new Date().toISOString()
-        };
-        store.put(data, storageKey);
-        await new Promise((resolve, reject) => {
-            tx.oncomplete = resolve;
-            tx.onerror = () => reject(tx.error);
-        });
-    } catch (err) {
-        console.log('IndexedDB persist failed', err);
-    }
 }
 
 async function loadData() {
@@ -2242,18 +2175,6 @@ function showBadgeNotification(badge) {
 }
 
 // Timer functions
-function parseHoldSeconds(hold) {
-    if (!hold) return 0;
-    const match = String(hold).match(/(\d+)/);
-    return match ? parseInt(match[1], 10) : 0;
-}
-
-function formatTime(totalSeconds) {
-    const mins = Math.floor(totalSeconds / 60);
-    const secs = totalSeconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-}
-
 function setupTimerButtons() {
     document.querySelectorAll('.timer-btn').forEach(btn => {
         if (btn.dataset.timerBound) return;
@@ -2738,23 +2659,6 @@ function openWeeklyReport() {
     } else {
         reportForm.dispatchEvent(new Event('submit', { cancelable: true }));
     }
-}
-
-function formatDateInput(date) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-}
-
-function escapeHtml(text) {
-    if (text == null) return '';
-    return String(text)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
 }
 
 function getExerciseName(log, exerciseId) {

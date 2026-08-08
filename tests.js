@@ -1,5 +1,7 @@
 const assert = require('assert');
 const PT_CONFIG = require('./config.js');
+const PT_UTILS = require('./utils.js');
+const PT_STORAGE = require('./storage.js');
 
 // Default exercises
 assert(Array.isArray(PT_CONFIG.defaultExercises), 'defaultExercises should be an array');
@@ -36,5 +38,21 @@ const allMilestones = badges.find(b => b.id === 'all_milestones');
 assert(allMilestones, 'all_milestones badge not found');
 assert.strictEqual(allMilestones.check({ completedMilestones: 12, totalMilestones: 13 }), false, 'all_milestones should not unlock early');
 assert.strictEqual(allMilestones.check({ completedMilestones: 13, totalMilestones: 13 }), true, 'all_milestones should unlock when all complete');
+
+// Utility helpers
+assert.strictEqual(PT_UTILS.formatDateInput(new Date(2026, 7, 15)), '2026-08-15', 'formatDateInput formats dates');
+assert.strictEqual(PT_UTILS.escapeHtml('<script>&"\''), '&lt;script&gt;&amp;&quot;&#039;', 'escapeHtml escapes HTML entities');
+assert.strictEqual(PT_UTILS.parseHoldSeconds('3-5 seconds'), 3, 'parseHoldSeconds parses the first number');
+assert.strictEqual(PT_UTILS.parseHoldSeconds('pause for a second while on your toes and when on your heels'), 0, 'parseHoldSeconds returns 0 when no number');
+assert.strictEqual(PT_UTILS.formatTime(65), '1:05', 'formatTime formats minutes and seconds');
+assert.strictEqual(PT_UTILS.formatTime(8), '0:08', 'formatTime pads seconds');
+
+// Storage key helper
+const originalTestMode = global.testMode;
+global.testMode = false;
+assert.strictEqual(PT_STORAGE.getStorageKey('ptExercises'), 'ptExercises', 'getStorageKey returns base key in normal mode');
+global.testMode = true;
+assert.strictEqual(PT_STORAGE.getStorageKey('ptExercises'), 'test_ptExercises', 'getStorageKey prefixes test key in test mode');
+global.testMode = originalTestMode;
 
 console.log('All tests passed.');

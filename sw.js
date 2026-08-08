@@ -5,6 +5,8 @@ const APP_SHELL = [
     '/styles.css',
     '/app.js',
     '/config.js',
+    '/utils.js',
+    '/storage.js',
     '/manifest.json',
     '/favicon.svg'
 ];

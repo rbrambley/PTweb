@@ -290,16 +290,31 @@ header h1 {
 
 @media (max-width: 600px) {
     .tabs {
-        flex-wrap: wrap;
-        position: sticky;
-        top: 0;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        top: auto;
         z-index: 100;
+        border-bottom: none;
+        border-top: 2px solid var(--border-color);
+        flex-wrap: nowrap;
     }
 
     .tab {
-        flex: 1 1 33%;
-        padding: 10px 4px;
-        font-size: 0.8em;
+        flex: 1 1 0;
+        min-width: 0;
+        padding: 8px 2px;
+        font-size: 0.65em;
+    }
+
+    .tab.active {
+        border-bottom: none;
+        border-top: 3px solid var(--accent-primary);
+    }
+
+    .container {
+        padding-bottom: 60px;
     }
 }
 
