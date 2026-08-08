@@ -477,7 +477,20 @@ function setupEventListeners() {
     // Tab switching
     document.querySelectorAll('.tab').forEach(tab => {
         tab.addEventListener('click', function() {
+            if (this.dataset.tab === 'more') {
+                toggleMoreMenu();
+            } else {
+                switchTab(this.dataset.tab);
+                closeMoreMenu();
+            }
+        });
+    });
+
+    // More menu item clicks
+    document.querySelectorAll('.more-menu-item').forEach(item => {
+        item.addEventListener('click', function() {
             switchTab(this.dataset.tab);
+            closeMoreMenu();
         });
     });
     
@@ -564,6 +577,38 @@ function setupEventListeners() {
             btn.setAttribute('aria-expanded', String(!isCollapsed));
         }
     });
+}
+
+function toggleMoreMenu() {
+    const menu = document.getElementById('more-menu');
+    const moreTab = document.querySelector('.tab[data-tab="more"]');
+    if (!menu || !moreTab) return;
+
+    const isOpen = !menu.classList.contains('open');
+    if (isOpen) {
+        menu.classList.add('open');
+        menu.setAttribute('aria-hidden', 'false');
+        moreTab.setAttribute('aria-expanded', 'true');
+        moreTab.classList.add('active');
+    } else {
+        menu.classList.remove('open');
+        menu.setAttribute('aria-hidden', 'true');
+        moreTab.setAttribute('aria-expanded', 'false');
+        moreTab.classList.remove('active');
+    }
+}
+
+function closeMoreMenu() {
+    const menu = document.getElementById('more-menu');
+    const moreTab = document.querySelector('.tab[data-tab="more"]');
+    if (!menu) return;
+
+    menu.classList.remove('open');
+    menu.setAttribute('aria-hidden', 'true');
+    if (moreTab) {
+        moreTab.setAttribute('aria-expanded', 'false');
+        moreTab.classList.remove('active');
+    }
 }
 
 function switchTab(tabName) {
