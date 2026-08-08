@@ -288,6 +288,21 @@ header h1 {
     border-radius: 3px 3px 0 0;
 }
 
+@media (max-width: 600px) {
+    .tabs {
+        flex-wrap: wrap;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+
+    .tab {
+        flex: 1 1 33%;
+        padding: 10px 4px;
+        font-size: 0.8em;
+    }
+}
+
 .tab-content {
     display: none;
     padding: 30px;
@@ -633,6 +648,10 @@ header h1 {
     min-width: 60px;
     text-align: center;
     font-family: 'Courier New', monospace;
+}
+
+.timer-display.timer-done {
+    color: var(--success);
 }
 
 .btn {

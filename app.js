@@ -3,145 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
 });
 
-// Default exercises from the PT flowsheet
-const defaultExercises = [
-    {
-        id: 1,
-        name: "Supine Hamstring Stretch - Strap",
-        description: "Use a stretch strap, bath towel, or bed sheet. Wrap it around the arch of your foot, then lay down on your back in a relaxed and comfortable position. Keeping your leg completely relaxed, use your arms to pull the strap. Feel a gentle stretch behind your thigh and/or knee. Try to keep your knee straight as you pull on the strap to ensure a good stretch.",
-        reps: "",
-        hold: "",
-        frequency: "",
-        weight: "",
-        metadata: {
-            created: "2026-07-30",
-            modified: "2026-07-30",
-            version: 1,
-            isActive: true
-        }
-    },
-    {
-        id: 2,
-        name: "Tandem Balance",
-        description: "Get set-up standing with your feet in a heel-to-toe position. Maintain your balance, switch feet and perform again. You should feel like your balance is being challenged. If you're having difficulty maintaining your balance, try to focus on an object with your eyes in the distance or near you. Try not to lose your posture or excessively lean forward/backward or side to side.",
-        reps: "",
-        hold: "",
-        frequency: "",
-        weight: "",
-        metadata: {
-            created: "2026-07-30",
-            modified: "2026-07-30",
-            version: 1,
-            isActive: true
-        }
-    },
-    {
-        id: 3,
-        name: "Sit To Stand",
-        description: "Place a box, chair, or elevated surface behind you. Sink your hips down and backwards with good squat form, and completely sit down. Then, shift your weight forward and stand back up. You should feel your thigh and butt muscles working. Try your best not to fall into the chair. Try to control yourself as you lower into the chair. Do not use momentum to stand up, if able.",
-        reps: "",
-        hold: "",
-        frequency: "",
-        weight: "",
-        metadata: {
-            created: "2026-07-30",
-            modified: "2026-08-07",
-            version: 1,
-            isActive: true
-        }
-    },
-    {
-        id: 4,
-        name: "BIG: Standing Hip Abduction",
-        description: "Stand upright while holding onto a stable surface for support (kitchen sink works well). Slowly move the working leg out to the side while keeping the trunk upright and the pelvis level. Return to the starting position with control and repeat. Ankle weights are not always needed, but can be used for added difficulty. Move slow and steady, no leaning. The less dependent you are on your hold, the more you will balance with your legs.",
-        reps: 20,
-        hold: "3-5 seconds",
-        frequency: "1-2 times a day",
-        weight: "3-5 lbs",
-        metadata: {
-            created: "2026-07-30",
-            modified: "2026-08-07",
-            version: 1,
-            isActive: true
-        }
-    },
-    {
-        id: 5,
-        name: "BIG: Seated Knee Extension (Long Arc Quad LAQ)",
-        description: "Sit at the edge of a table or chair with feet hanging freely (if possible). Slowly straighten your knee until your leg is fully extended, then lower it back down with control. Keep your trunk upright and avoid leaning back. Ankle weights are not always necessary, but often used in clinic. Hold for 3 seconds.",
-        reps: 20,
-        hold: "3 seconds",
-        frequency: "2-3 times per day",
-        weight: "",
-        metadata: {
-            created: "2026-07-30",
-            modified: "2026-08-07",
-            version: 1,
-            isActive: true
-        }
-    },
-    {
-        id: 6,
-        name: "BIG: Standing Knee Bend / Standing Hamstring Curl (Supported)",
-        description: "Stand tall while holding onto a stable surface for balance. Slowly bend your knee, bringing your heel toward your buttocks while keeping your thighs aligned and your hips steady. Lower the leg back down with control and repeat. Ankle weights are not always necessary, but often used in clinic.",
-        reps: 20,
-        hold: "3 seconds",
-        frequency: "2-3 times per day",
-        weight: "",
-        metadata: {
-            created: "2026-07-30",
-            modified: "2026-08-07",
-            version: 1,
-            isActive: true
-        }
-    },
-    {
-        id: 7,
-        name: "BIG: Toe and Heel Raises",
-        description: "Stand tall while lightly holding onto a stable surface for balance. The kitchen sink is a good place to hold on to. Do not fall backwards when raising your toes. Heel raises: lift your heels off the ground, rising up onto the balls of your feet. Hold briefly, then lower slowly. Toe raises: lift your toes and the front of your foot while keeping your heels on the ground. Hold briefly, then lower with control. Repeat in a smooth, controlled motion without leaning forward or backward.",
-        reps: 20,
-        hold: "pause for a second while on your toes and when on your heels",
-        frequency: "2-3 times per day",
-        weight: "",
-        metadata: {
-            created: "2026-07-30",
-            modified: "2026-08-07",
-            version: 1,
-            isActive: true
-        }
-    },
-    {
-        id: 8,
-        name: "BIG: Cross Drill Tandem",
-        description: "Stand in a tandem stance (one foot directly in front of the other) on a foam pad. Hold a lightweight medicine ball (or similar object) at chest height. Maintain a tall posture, core engaged, and eyes forward. Slowly raise the ball up and diagonally across your body, extending your arms overhead in a controlled cross-body pattern. Return to the starting position without losing balance. Keep your lower body steady and avoid twisting excessively through the hips or trunk. Repeat for the prescribed number of repetitions, then switch tandem foot position to challenge both sides equally.",
-        reps: "10 each stance",
-        hold: "5-10 seconds",
-        frequency: "2-3 times per day",
-        weight: "",
-        metadata: {
-            created: "2026-08-07",
-            modified: "2026-08-07",
-            version: 1,
-            isActive: true
-        }
-    },
-    {
-        id: 9,
-        name: "BIG: Single Leg RDL's",
-        description: "Stand on one leg with a soft bend in your knee. Keep your back straight and your core muscles engaged. Slowly hinge forward at your hips, allowing your opposite leg to extend straight behind you as a counterbalance. Your torso and lifted leg should move together, staying in a straight line from your head to your heel. Reach your hand toward the floor or toward your shin while keeping your hips level and avoiding twisting or rounding your back. Move only as far as you can while maintaining good balance and control. Then tighten your glutes and hamstrings to return to the upright position. Perform the motion slowly and steadily.",
-        reps: "20 each side",
-        hold: "2-3 seconds",
-        frequency: "2-3 times per day",
-        weight: "",
-        metadata: {
-            created: "2026-08-07",
-            modified: "2026-08-07",
-            version: 1,
-            isActive: true
-        }
-    }
-];
-
+// Default exercises are defined in config.js
 let exercises = [];
 let dailyLogs = {};
 let swellingLogs = {};
@@ -186,7 +48,7 @@ function createMockData() {
         };
 
         // Add exercise data for each exercise
-        defaultExercises.forEach(exercise => {
+        PT_CONFIG.defaultExercises.forEach(exercise => {
             const completed = Math.random() > 0.2; // 80% completion rate
             mockDailyLogs[dateStr].sessions.morning[exercise.id] = {
                 completed: completed,
@@ -227,7 +89,7 @@ function checkForExerciseUpdates() {
     };
 
     // Check for new or modified exercises, avoiding duplicates by ID or name
-    defaultExercises.forEach(defaultExercise => {
+    PT_CONFIG.defaultExercises.forEach(defaultExercise => {
         const existingById = exercises.find(ex => ex.id === defaultExercise.id);
         const existingByName = !existingById ? exercises.find(
             ex => ex.name && defaultExercise.name &&
@@ -421,6 +283,9 @@ function initializeApp() {
     // Load data from localStorage
     loadData();
 
+    // Prompt for a backup if it has been more than a week
+    checkBackupReminder();
+
     // Set default date to today
     document.getElementById('log-date').valueAsDate = new Date();
 
@@ -502,7 +367,7 @@ function loadData() {
         // Check for exercise updates from default
         checkForExerciseUpdates();
     } else {
-        exercises = [...defaultExercises];
+        exercises = [...PT_CONFIG.defaultExercises];
         saveExercises();
     }
 
@@ -1832,6 +1697,32 @@ function exportData() {
     URL.revokeObjectURL(url);
 }
 
+function backupNow() {
+    exportData();
+    localStorage.setItem(PT_CONFIG.storage.lastBackup, String(Date.now()));
+}
+
+function checkBackupReminder() {
+    if (testMode) return;
+
+    const oneWeek = 7 * 24 * 60 * 60 * 1000;
+    const lastBackup = parseInt(localStorage.getItem(PT_CONFIG.storage.lastBackup), 10) || 0;
+    const now = Date.now();
+
+    if (!lastBackup) {
+        localStorage.setItem(PT_CONFIG.storage.lastBackup, String(now));
+        return;
+    }
+
+    if (now - lastBackup > oneWeek) {
+        if (confirm('It has been over a week since your last PT Tracker backup. Create a backup now?')) {
+            backupNow();
+        } else {
+            localStorage.setItem(PT_CONFIG.storage.lastBackup, String(now));
+        }
+    }
+}
+
 function importData(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -2263,8 +2154,22 @@ function showBadgeNotification(badge) {
 }
 
 // Timer functions
+function parseHoldSeconds(hold) {
+    if (!hold) return 0;
+    const match = String(hold).match(/(\d+)/);
+    return match ? parseInt(match[1], 10) : 0;
+}
+
+function formatTime(totalSeconds) {
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
 function setupTimerButtons() {
     document.querySelectorAll('.timer-btn').forEach(btn => {
+        if (btn.dataset.timerBound) return;
+        btn.dataset.timerBound = 'true';
         btn.addEventListener('click', function() {
             const exerciseId = this.dataset.exerciseId;
             toggleTimer(exerciseId, this);
@@ -2279,24 +2184,40 @@ function toggleTimer(exerciseId, btn) {
         delete timers[exerciseId];
         btn.classList.remove('running');
         btn.querySelector('.timer-text').textContent = 'Start Timer';
-    } else {
-        // Start timer
-        let seconds = 0;
-        const display = document.getElementById(`timer-display-${exerciseId}`);
-        
-        timers[exerciseId] = {
-            interval: setInterval(() => {
-                seconds++;
-                const mins = Math.floor(seconds / 60);
-                const secs = seconds % 60;
-                display.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
-            }, 1000),
-            startTime: Date.now()
-        };
-        
-        btn.classList.add('running');
-        btn.querySelector('.timer-text').textContent = 'Stop Timer';
+        return;
     }
+
+    const exercise = exercises.find(ex => String(ex.id) === String(exerciseId));
+    const totalSeconds = exercise ? parseHoldSeconds(exercise.hold) : 0;
+    if (!totalSeconds) return;
+
+    const display = document.getElementById(`timer-display-${exerciseId}`);
+    if (display) display.classList.remove('timer-done');
+
+    let remaining = totalSeconds;
+    if (display) display.textContent = formatTime(remaining);
+
+    timers[exerciseId] = {
+        interval: setInterval(() => {
+            remaining--;
+            if (display) display.textContent = formatTime(remaining);
+            if (remaining <= 0) {
+                clearInterval(timers[exerciseId].interval);
+                delete timers[exerciseId];
+                btn.classList.remove('running');
+                btn.querySelector('.timer-text').textContent = 'Start Timer';
+                if (display) {
+                    display.textContent = 'Done!';
+                    display.classList.add('timer-done');
+                    setTimeout(() => display.classList.remove('timer-done'), 2000);
+                }
+            }
+        }, 1000),
+        startTime: Date.now()
+    };
+
+    btn.classList.add('running');
+    btn.querySelector('.timer-text').textContent = 'Stop Timer';
 }
 
 // Calendar functions
