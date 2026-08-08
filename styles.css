@@ -266,6 +266,14 @@ header h1 {
     position: relative;
 }
 
+.tab-full {
+    display: inline;
+}
+
+.tab-short {
+    display: none;
+}
+
 .tab:hover {
     background: var(--bg-primary);
     color: var(--text-primary);
@@ -299,18 +307,34 @@ header h1 {
         border-bottom: none;
         border-top: 2px solid var(--border-color);
         flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .tabs::-webkit-scrollbar {
+        display: none;
     }
 
     .tab {
-        flex: 1 1 0;
-        min-width: 0;
-        padding: 8px 2px;
-        font-size: 0.65em;
+        flex: 0 0 auto;
+        min-width: 44px;
+        padding: 8px 4px;
+        font-size: 0.75em;
     }
 
     .tab.active {
         border-bottom: none;
         border-top: 3px solid var(--accent-primary);
+    }
+
+    .tab-full {
+        display: none;
+    }
+
+    .tab-short {
+        display: inline;
     }
 
     .container {
