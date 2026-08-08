@@ -1,10 +1,11 @@
-const CACHE_NAME = 'pt-tracker-v11';
+const CACHE_NAME = 'pt-tracker-v12';
 const CDN_CACHE_NAME = 'pt-cdn-v1';
 const APP_SHELL = [
     '/',
     '/index.html',
     '/styles.css',
     '/app.js',
+    '/reports.js',
     '/config.js',
     '/utils.js',
     '/storage.js',
