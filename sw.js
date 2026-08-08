@@ -1,4 +1,5 @@
-const CACHE_NAME = 'pt-tracker-v10';
+const CACHE_NAME = 'pt-tracker-v11';
+const CDN_CACHE_NAME = 'pt-cdn-v1';
 const APP_SHELL = [
     '/',
     '/index.html',
@@ -10,6 +11,14 @@ const APP_SHELL = [
     '/manifest.json',
     '/favicon.svg'
 ];
+
+const CDN_PATTERNS = [
+    /^https:\/\/cdn\.jsdelivr\.net/
+];
+
+function isCdnUrl(url) {
+    return CDN_PATTERNS.some(pattern => pattern.test(url));
+}
 
 self.addEventListener('install', function(event) {
     event.waitUntil(
@@ -34,6 +43,21 @@ self.addEventListener('activate', function(event) {
 self.addEventListener('fetch', function(event) {
     const { request } = event;
     const url = new URL(request.url);
+
+    // Cache known CDN assets (e.g. Chart.js) for offline use
+    if (url.origin !== self.location.origin && isCdnUrl(url.href)) {
+        event.respondWith(
+            caches.open(CDN_CACHE_NAME).then(cache =>
+                cache.match(request).then(cached =>
+                    cached || fetch(request).then(response => {
+                        cache.put(request, response.clone());
+                        return response;
+                    }).catch(() => cached)
+                )
+            )
+        );
+        return;
+    }
 
     // Only cache same-origin app shell requests
     if (url.origin !== self.location.origin) {
