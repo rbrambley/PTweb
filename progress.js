@@ -71,12 +71,8 @@ function updateProgress() {
     streakCount.textContent = currentStreak;
     streakLabel.textContent = 'day streak';
     
-    if (currentStreak >= 7) {
-        streakFire.textContent = 'Fire Fire Fire';
-    } else if (currentStreak >= 3) {
-        streakFire.textContent = 'Fire Fire';
-    } else if (currentStreak >= 1) {
-        streakFire.textContent = 'Fire';
+    if (currentStreak >= 1) {
+        streakFire.textContent = '🔥';
     } else {
         streakFire.textContent = '—';
     }

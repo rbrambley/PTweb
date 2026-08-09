@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pt-tracker-v20';
+const CACHE_NAME = 'pt-tracker-v21';
 const CDN_CACHE_NAME = 'pt-cdn-v1';
 
 // Paths are relative to this service worker's directory.
