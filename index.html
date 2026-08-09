@@ -504,7 +504,22 @@
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' })
-                .then(reg => console.log('Service worker registered'))
+                .then(reg => {
+                    console.log('Service worker registered');
+
+                    reg.addEventListener('updatefound', () => {
+                        const newWorker = reg.installing;
+                        if (!newWorker) return;
+
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'activated' && navigator.serviceWorker.controller) {
+                                if (confirm('A new version of PT Tracker is available. Refresh to update?')) {
+                                    window.location.reload();
+                                }
+                            }
+                        });
+                    });
+                })
                 .catch(err => console.log('Service worker registration failed', err));
         }
     </script>
