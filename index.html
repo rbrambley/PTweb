@@ -391,9 +391,12 @@
             <!-- Flowsheet Tab -->
             <section id="flowsheet-tab" class="tab-content">
                 <h2>PT Flowsheet</h2>
-                <p class="setting-description">Reference the original PT prescription from the flowsheet PDF.</p>
+                <p class="setting-description">Upload your PT prescription PDF for reference. The file stays on this device and is not sent anywhere.</p>
+                <div class="flowsheet-upload">
+                    <input type="file" id="flowsheet-file" accept="application/pdf" aria-label="Upload PT flowsheet PDF">
+                </div>
                 <div class="pdf-viewer">
-                    <embed src="Richard%20Brambley_76546070_flowsheet_hep.pdf" type="application/pdf" width="100%" height="100%" title="PT flowsheet PDF" />
+                    <embed id="flowsheet-embed" type="application/pdf" width="100%" height="100%" title="PT flowsheet PDF" />
                 </div>
             </section>
         </main>

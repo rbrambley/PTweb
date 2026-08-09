@@ -190,6 +190,13 @@ function setupEventListeners() {
         generateReport();
     });
 
+    // Flowsheet PDF upload (client-side only)
+    document.getElementById('flowsheet-file').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        document.getElementById('flowsheet-embed').src = URL.createObjectURL(file);
+    });
+
     // Collapse/expand daily log cards and swelling panel
     setupCollapseListeners();
 }
