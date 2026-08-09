@@ -26,7 +26,7 @@ function renderCalendar() {
     
     // Days of the month
     const today = new Date();
-    const todayStr = today.toISOString().split('T')[0];
+    const todayStr = formatDateInput(today);
     
     for (let day = 1; day <= daysInMonth; day++) {
         const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -250,7 +250,7 @@ function computeCurrentStreak() {
     let checkDate = new Date(today);
 
     // Check today first; if no data, start checking yesterday
-    const todayStr = checkDate.toISOString().split('T')[0];
+    const todayStr = formatDateInput(checkDate);
     if (hasLoggedData(todayStr)) {
         streak++;
     } else {
@@ -258,7 +258,7 @@ function computeCurrentStreak() {
     }
 
     while (true) {
-        const dateStr = checkDate.toISOString().split('T')[0];
+        const dateStr = formatDateInput(checkDate);
         if (!hasLoggedData(dateStr)) break;
         streak++;
         checkDate.setDate(checkDate.getDate() - 1);

@@ -39,7 +39,7 @@ function createMockData() {
     for (let i = 6; i >= 0; i--) {
         const date = new Date(today);
         date.setDate(date.getDate() - i);
-        const dateStr = date.toISOString().split('T')[0];
+        const dateStr = formatDateInput(date);
 
         mockDailyLogs[dateStr] = {
             sessions: {
@@ -227,7 +227,7 @@ function showDetailedUpdateInfo(updates) {
 }
 
 function applyExerciseUpdates(updates) {
-    const today = new Date().toISOString().split('T')[0];
+    const today = formatDateInput(new Date());
 
     // Add new exercises
     updates.newExercises.forEach(newExercise => {
@@ -283,7 +283,7 @@ async function initializeApp() {
     checkBackupReminder();
 
     // Set default date to today
-    document.getElementById('log-date').valueAsDate = new Date();
+    document.getElementById('log-date').value = formatDateInput(new Date());
 
     // Set up event listeners
     setupEventListeners();
@@ -873,7 +873,7 @@ function toggleExerciseActive(exerciseId) {
         exercise.metadata = {
             ...exercise.metadata,
             isActive: newActive,
-            archived: newActive ? null : new Date().toISOString().split('T')[0]
+            archived: newActive ? null : formatDateInput(new Date())
         };
         saveExercises();
         renderManageExercises();
@@ -917,6 +917,7 @@ function saveDayProgress() {
     const timestamp = new Date().toISOString();
 
     exercises.forEach(exercise => {
+        if (!document.getElementById(`completed-${exercise.id}`)) return;
         const completed = document.getElementById(`completed-${exercise.id}`).checked;
         const reps = document.getElementById(`reps-${exercise.id}`).value;
         const weight = document.getElementById(`weight-${exercise.id}`).value;
@@ -974,7 +975,7 @@ function updateProgress() {
 
     // Current streak calculation
     let currentStreak = 0;
-    const today = new Date().toISOString().split('T')[0];
+    const today = formatDateInput(new Date());
 
     for (let i = validDates.length - 1; i >= 0; i--) {
         const date = validDates[i];
@@ -1159,7 +1160,7 @@ function deleteExercise(id) {
             exercise.metadata = {
                 ...exercise.metadata,
                 isActive: false,
-                archived: new Date().toISOString().split('T')[0]
+                archived: formatDateInput(new Date())
             };
             saveExercises();
             renderManageExercises();
@@ -1757,7 +1758,7 @@ function exportData() {
     const link = document.createElement('a');
     link.href = url;
     const prefix = testMode ? 'test-' : '';
-    link.download = `${prefix}pt-tracker-backup-${new Date().toISOString().split('T')[0]}.json`;
+    link.download = `${prefix}pt-tracker-backup-${formatDateInput(new Date())}.json`;
     link.click();
 
     URL.revokeObjectURL(url);
@@ -2022,7 +2023,7 @@ function updateWeeklyGoals(dates) {
     // Get dates for current week
     const weekDates = [];
     for (let d = new Date(startOfWeek); d <= endOfWeek; d.setDate(d.getDate() + 1)) {
-        const dateStr = d.toISOString().split('T')[0];
+        const dateStr = formatDateInput(d);
         weekDates.push(dateStr);
     }
     
