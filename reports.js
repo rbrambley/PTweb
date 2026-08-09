@@ -126,7 +126,8 @@ function generateReport() {
                 }
 
                 const name = getExerciseName(log, exerciseId);
-                const status = log.completed ? '✅' : '⏳';
+                const statusText = log.completed ? 'Done' : 'Pending';
+                const status = log.completed ? '<span class="status-complete">Done</span>' : '<span class="status-pending">Pending</span>';
                 const details = [];
                 if (log.reps != null) details.push(`${log.reps} reps`);
                 if (log.weight != null) details.push(`${log.weight} lbs`);
@@ -144,7 +145,7 @@ function generateReport() {
                 sessionHtml.push(`<li class="report-exercise">${status} <strong>${escapeHtml(name)}</strong>${detailString}${timeString}</li>`);
 
                 const textDetail = details.length ? ` (${details.join(', ')})` : '';
-                textLines.push(`    ${status} ${name}${textDetail}${time ? ` @ ${time}` : ''}`);
+                textLines.push(`    ${statusText} ${name}${textDetail}${time ? ` @ ${time}` : ''}`);
             });
 
             const sessionTotal = exerciseEntries.length;

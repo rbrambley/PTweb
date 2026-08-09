@@ -2394,3 +2394,12 @@ input:checked + .slider:before {
         text-align: center;
     }
 }
+
+.status-complete {
+    color: var(--success);
+    font-weight: bold;
+}
+
+.status-pending {
+    color: var(--text-muted);
+}

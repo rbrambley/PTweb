@@ -299,7 +299,7 @@ function openCalendarDayModal(dateStr) {
                     totalExercises++;
                     if (exerciseData.completed) completedExercises++;
                     const exerciseName = getExerciseName(exerciseData, exerciseId);
-                    const statusIcon = exerciseData.completed ? '✅' : '⏳';
+                    const statusIcon = exerciseData.completed ? '<span class="status-complete">Done</span>' : '<span class="status-pending">Pending</span>';
                     const metaParts = [];
                     if (exerciseData.reps) metaParts.push(`${exerciseData.reps} reps`);
                     if (exerciseData.weight) metaParts.push(`${exerciseData.weight}`);
@@ -328,7 +328,7 @@ function openCalendarDayModal(dateStr) {
                 totalExercises++;
                 if (log.completed) completedExercises++;
                 const exerciseName = getExerciseName(log, exerciseId);
-                const statusIcon = log.completed ? '✅' : '⏳';
+                const statusIcon = log.completed ? '<span class="status-complete">Done</span>' : '<span class="status-pending">Pending</span>';
                 return `
                     <div class="day-detail-exercise">
                         <span class="day-detail-exercise-status">${statusIcon}</span>

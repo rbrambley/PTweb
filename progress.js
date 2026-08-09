@@ -69,16 +69,16 @@ function updateProgress() {
     const streakLabel = document.getElementById('streak-label');
     
     streakCount.textContent = currentStreak;
-    streakLabel.textContent = currentStreak === 1 ? 'day streak' : 'day streak';
+    streakLabel.textContent = 'day streak';
     
     if (currentStreak >= 7) {
-        streakFire.textContent = '🔥🔥🔥';
+        streakFire.textContent = 'Fire Fire Fire';
     } else if (currentStreak >= 3) {
-        streakFire.textContent = '🔥🔥';
+        streakFire.textContent = 'Fire Fire';
     } else if (currentStreak >= 1) {
-        streakFire.textContent = '🔥';
+        streakFire.textContent = 'Fire';
     } else {
-        streakFire.textContent = '💨';
+        streakFire.textContent = '—';
     }
     
     // Completion rate

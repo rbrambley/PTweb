@@ -48,7 +48,7 @@ function renderDailyExercises() {
                         return `
                         <div class="session-item">
                             <span class="session-name">${sessionName}</span>
-                            <span class="session-status">${exerciseData.completed ? '✅' : '⏳'}</span>
+                            <span class="session-status">${exerciseData.completed ? '<span class="status-complete">Done</span>' : '<span class="status-pending">Pending</span>'}</span>
                             ${exerciseData.reps ? `<span class="session-reps">${exerciseData.reps} reps</span>` : ''}
                             ${exerciseData.timestamp ? `<span class="session-time">${new Date(exerciseData.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>` : ''}
                         </div>
@@ -311,3 +311,10 @@ function toggleTimer(exerciseId, btn) {
     btn.classList.add('running');
     btn.querySelector('.timer-text').textContent = 'Stop Timer';
 }
+
+// Today shortcut for the Daily tab
+document.getElementById('go-today').addEventListener('click', function() {
+    document.getElementById('log-date').value = formatDateInput(new Date());
+    renderDailyExercises();
+    renderSwellingLog();
+});
