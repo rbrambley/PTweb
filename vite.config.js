@@ -34,9 +34,11 @@ export default defineConfig({
     copyRootStaticFiles([
       'app.js',
       'countdown.js',
+      'exercises.js',
       'settings.js',
       'calendar.js',
       'config.js',
+      'milestones.js',
       'reports.js',
       'storage.js',
       'utils.js',
