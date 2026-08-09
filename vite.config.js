@@ -33,6 +33,7 @@ export default defineConfig({
   plugins: [
     copyRootStaticFiles([
       'app.js',
+      'daily.js',
       'countdown.js',
       'exercises.js',
       'settings.js',
