@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pt-tracker-v17';
+const CACHE_NAME = 'pt-tracker-v18';
 const CDN_CACHE_NAME = 'pt-cdn-v1';
 
 // Paths are relative to this service worker's directory.
@@ -8,6 +8,7 @@ const APP_SHELL = [
     'index.html',
     'styles.css',
     'app.js',
+    'state.js',
     'countdown.js',
     'settings.js',
     'exercises.js',
