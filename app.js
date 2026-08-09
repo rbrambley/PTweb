@@ -812,9 +812,9 @@ function saveSwellingLog() {
         swellingLogs[selectedDate] = {};
     }
     swellingLogs[selectedDate][time] = {
-        level: level ? parseInt(level) : null,
+        level: level !== '' ? parseInt(level) : null,
         location,
-        circumference: circumference ? parseFloat(circumference) : null,
+        circumference: circumference !== '' ? parseFloat(circumference) : null,
         time,
         notes,
         timestamp: new Date().toISOString()
