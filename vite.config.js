@@ -43,6 +43,7 @@ export default defineConfig({
       'progress.js',
       'reports.js',
       'storage.js',
+      'state.js',
       'utils.js',
       'sw.js',
 
