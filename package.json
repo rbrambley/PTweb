@@ -1,0 +1,19 @@
+{
+  "name": "disc-golf-pt-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Track physical therapy exercises, swelling, and return-to-play milestones for disc golf recovery.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node tests.js",
+    "lint": "eslint .",
+    "icons": "node scripts/generate-icons.js"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "sharp": "^0.35.3",
+    "vite": "^5.4.10"
+  }
+}

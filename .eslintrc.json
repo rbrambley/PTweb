@@ -1,0 +1,26 @@
+{
+  "env": {
+    "browser": true,
+    "node": true,
+    "es2022": true,
+    "serviceworker": true
+  },
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "script"
+  },
+  "rules": {
+    "no-undef": "off",
+    "no-unused-vars": "off",
+    "no-redeclare": "off",
+    "no-console": "off"
+  },
+  "ignorePatterns": ["dist/", "node_modules/", "package-lock.json"],
+  "overrides": [
+    {
+      "files": ["vite.config.js"],
+      "parserOptions": { "sourceType": "module" },
+      "env": { "node": true }
+    }
+  ]
+}
