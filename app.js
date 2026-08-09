@@ -535,6 +535,7 @@ function setupEventListeners() {
     // Settings functionality
     document.getElementById('enable-reminders').addEventListener('click', enableReminders);
     document.getElementById('disable-reminders').addEventListener('click', disableReminders);
+    document.getElementById('save-target-date').addEventListener('click', saveTargetDate);
     document.getElementById('export-data').addEventListener('click', exportData);
     document.getElementById('import-data').addEventListener('click', () => {
         document.getElementById('import-file').click();
@@ -544,8 +545,9 @@ function setupEventListeners() {
     document.getElementById('toggle-test-mode').addEventListener('click', toggleTestMode);
     document.getElementById('clear-test-data').addEventListener('click', clearTestData);
     
-    // Load reminder settings
+    // Load reminder and target settings
     loadReminderSettings();
+    loadTargetDateSettings();
     
     // Exercise form submission
     document.getElementById('exercise-form').addEventListener('submit', handleExerciseFormSubmit);
@@ -640,9 +642,10 @@ function switchTab(tabName) {
     // Set up timer buttons
     setupTimerButtons();
     
-    // Load reminder settings when switching to settings tab
+    // Load reminder and target settings when switching to settings tab
     if (tabName === 'settings') {
         loadReminderSettings();
+        loadTargetDateSettings();
     }
 
     if (tabName === 'milestones') {
@@ -1119,15 +1122,21 @@ function renderHistory(dates) {
 }
 
 function updateCountdown() {
-    // Target: First week of September 2026
-    const targetDate = new Date('2026-09-01');
+    const savedTarget = localStorage.getItem(PT_CONFIG.storage.targetDate);
+    const targetDateStr = savedTarget || '2026-09-01';
+    const targetDate = new Date(`${targetDateStr}T00:00:00`);
     const today = new Date();
-    
+
     const diffTime = targetDate - today;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     const weeks = Math.ceil(diffDays / 7);
-    
+
     document.getElementById('countdown').textContent = `${weeks} weeks remaining`;
+    document.getElementById('target-label').textContent = targetDate.toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+    });
 }
 
 function openAddExerciseModal() {
@@ -1657,6 +1666,19 @@ function loadReminderSettings() {
         document.getElementById('disable-reminders').classList.remove('hidden');
         scheduleReminder(reminderTime);
     }
+}
+
+function loadTargetDateSettings() {
+    const savedTarget = localStorage.getItem(PT_CONFIG.storage.targetDate) || '2026-09-01';
+    document.getElementById('target-date').value = savedTarget;
+    updateCountdown();
+}
+
+function saveTargetDate() {
+    const targetDate = document.getElementById('target-date').value;
+    if (!targetDate) return;
+    localStorage.setItem(PT_CONFIG.storage.targetDate, targetDate);
+    updateCountdown();
 }
 
 function enableReminders() {

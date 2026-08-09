@@ -11,6 +11,7 @@ const PT_CONFIG = {
         theme: 'theme',
         remindersEnabled: 'remindersEnabled',
         reminderTime: 'reminderTime',
+        targetDate: 'ptTargetDate',
         lastBackup: 'ptLastBackup'
     },
     defaultExercises: [
