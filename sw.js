@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pt-tracker-v13';
+const CACHE_NAME = 'pt-tracker-v14';
 const CDN_CACHE_NAME = 'pt-cdn-v1';
 const APP_SHELL = [
     '/',
