@@ -39,6 +39,7 @@ export default defineConfig({
       'calendar.js',
       'config.js',
       'milestones.js',
+      'progress.js',
       'reports.js',
       'storage.js',
       'utils.js',
