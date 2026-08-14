@@ -313,7 +313,7 @@ function updateSessionOptions() {
     });
 
     if (select.value && !existingOptions.has(select.value)) {
-        select.value = 'morning';
+        select.value = existingSessions[0] || 'morning';
     }
 }
 

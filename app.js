@@ -130,7 +130,11 @@ function setupEventListeners() {
     document.getElementById('session-type').addEventListener('change', function() {
         const customInput = document.getElementById('custom-session-name');
         customInput.classList.toggle('hidden', this.value !== 'custom');
+        renderDailyExercises();
     });
+
+    // Custom session name change
+    document.getElementById('custom-session-name').addEventListener('change', renderDailyExercises);
 
     // Save day's progress
     document.getElementById('save-day').addEventListener('click', saveDayProgress);
