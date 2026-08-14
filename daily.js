@@ -12,8 +12,12 @@ function renderDailyExercises() {
         sessionName = customName || 'custom';
     }
 
-    // Filter out inactive exercises for daily view
-    const activeExercises = exercises.filter(ex => ex.metadata?.isActive !== false);
+    // Filter out inactive exercises for daily view, but keep them if they
+    // were already logged in this session on a previous date so they can be edited.
+    const activeExercises = exercises.filter(ex => {
+        if (ex.metadata?.isActive !== false) return true;
+        return !!dailyLogs[selectedDate]?.sessions?.[sessionName]?.[ex.id];
+    });
 
     if (activeExercises.length === 0) {
         container.innerHTML = '<p>No active exercises. Go to "Manage Exercises" to add or activate exercises.</p>';
