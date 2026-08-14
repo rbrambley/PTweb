@@ -506,7 +506,7 @@
     <script src="calendar.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' })
+            navigator.serviceWorker.register('sw.js?v=27', { updateViaCache: 'none' })
                 .then(reg => {
                     console.log('Service worker registered');
 
