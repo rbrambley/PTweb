@@ -34,6 +34,7 @@ function renderDailyExercises() {
         const existingLog = dailyLogs[selectedDate]?.sessions?.[sessionName]?.[exercise.id] || {};
         const lastValues = getLastExerciseValues(exercise.id);
         const logData = { ...lastValues, ...existingLog };
+        const hasExistingLog = Object.keys(existingLog).length > 0;
 
         return `
             <div class="exercise-card collapsed ${logData.excluded ? 'excluded' : ''}" data-exercise-id="${exercise.id}">
@@ -112,6 +113,12 @@ function renderDailyExercises() {
                         <label>Notes:</label>
                         <textarea id="notes-${exercise.id}" rows="2" placeholder="How did it feel? Any modifications?" ${logData.excluded ? 'disabled' : ''}>${logData.notes || ''}</textarea>
                     </div>
+
+                    ${hasExistingLog ? `
+                    <div class="exercise-actions">
+                        <button class="btn btn-danger" type="button" onclick="removeExerciseFromSession(${exercise.id})">Remove from session</button>
+                    </div>
+                    ` : ''}
                 </div>
             </div>
         `;
@@ -281,6 +288,32 @@ function saveDayProgress() {
     saveDailyLogs();
     alert(`Progress saved for ${sessionName} session!`);
     updateProgress();
+}
+
+function removeExerciseFromSession(exerciseId) {
+    const selectedDate = document.getElementById('log-date').value;
+    const sessionType = document.getElementById('session-type').value;
+    let sessionName = sessionType;
+
+    if (sessionType === 'custom') {
+        const customName = document.getElementById('custom-session-name').value.trim();
+        sessionName = customName || 'custom';
+    }
+
+    if (!selectedDate || !sessionName || !dailyLogs[selectedDate]?.sessions?.[sessionName]?.[exerciseId]) return;
+
+    if (!confirm('Remove this exercise from this session?')) return;
+
+    delete dailyLogs[selectedDate].sessions[sessionName][exerciseId];
+
+    // Clean up the session if it is now empty
+    if (Object.keys(dailyLogs[selectedDate].sessions[sessionName]).length === 0) {
+        delete dailyLogs[selectedDate].sessions[sessionName];
+    }
+
+    saveDailyLogs();
+    updateProgress();
+    renderDailyExercises();
 }
 
 function updateSessionOptions() {
