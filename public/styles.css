@@ -2403,3 +2403,27 @@ input:checked + .slider:before {
 .status-pending {
     color: var(--text-muted);
 }
+
+.status-skipped {
+    color: var(--warning);
+    font-weight: bold;
+}
+
+.exercise-card.excluded {
+    opacity: 0.65;
+    background: var(--bg-tertiary);
+}
+
+.exercise-card.excluded .tracking-section input,
+.exercise-card.excluded .tracking-section textarea,
+.exercise-card.excluded .tracking-section button {
+    opacity: 0.7;
+}
+
+.skip-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    color: var(--text-secondary);
+}

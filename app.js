@@ -258,6 +258,11 @@ function switchTab(tabName) {
     if (tabName === 'calendar') {
         renderCalendar();
     }
+
+    if (tabName === 'daily') {
+        renderDailyExercises();
+        renderSwellingLog();
+    }
     
     // Set up timer buttons
     setupTimerButtons();

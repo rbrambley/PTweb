@@ -127,6 +127,7 @@ function updateWeeklyGoals(dates) {
             if (dayLog.sessions && Object.keys(dayLog.sessions).length > 0) {
                 Object.values(dayLog.sessions).forEach(session => {
                     Object.values(session).forEach(log => {
+                        if (log.excluded) return;
                         totalExercisesThisWeek++;
                         if (log.completed) {
                             completedExercisesThisWeek++;
@@ -136,9 +137,10 @@ function updateWeeklyGoals(dates) {
                 });
             } else {
                 // Old data structure for backward compatibility
-                hasCompletedExercise = Object.values(dayLog).some(log => log.completed);
+                hasCompletedExercise = Object.values(dayLog).some(log => !log.excluded && log.completed);
 
                 Object.values(dayLog).forEach(log => {
+                    if (log.excluded) return;
                     totalExercisesThisWeek++;
                     if (log.completed) {
                         completedExercisesThisWeek++;
@@ -199,12 +201,13 @@ function updateAchievements() {
         if (dayLog.sessions && Object.keys(dayLog.sessions).length > 0) {
             Object.values(dayLog.sessions).forEach(session => {
                 Object.values(session).forEach(exerciseData => {
+                    if (exerciseData.excluded) return;
                     if (exerciseData.completed) exercisesCompleted++;
                 });
             });
         } else {
             // Support old data structure
-            exercisesCompleted = Object.values(dayLog).filter(log => log.completed).length;
+            exercisesCompleted = Object.values(dayLog).filter(log => !log.excluded && log.completed).length;
         }
 
         if (exercisesCompleted > 0) {
@@ -227,6 +230,7 @@ function updateAchievements() {
         if (dayLog.sessions && Object.keys(dayLog.sessions).length > 0) {
             Object.values(dayLog.sessions).forEach(session => {
                 Object.values(session).forEach(log => {
+                    if (log.excluded) return;
                     totalPossible++;
                     if (log.completed) {
                         totalCompleted++;
@@ -239,13 +243,14 @@ function updateAchievements() {
         } else {
             // Old data structure for backward compatibility
             Object.values(dayLog).forEach(log => {
+                if (log.excluded) return;
                 totalPossible++;
                 if (log.completed) {
                     totalCompleted++;
                 }
             });
 
-            painValues = Object.values(dayLog).map(log => log.pain).filter(pain => pain !== null && pain !== undefined);
+            painValues = Object.values(dayLog).filter(log => !log.excluded).map(log => log.pain).filter(pain => pain !== null && pain !== undefined);
         }
 
         // Check for low pain day (average pain <= 2)

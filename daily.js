@@ -2,6 +2,7 @@
 
 function renderDailyExercises() {
     const container = document.getElementById('daily-exercises');
+    updateSessionOptions();
     const selectedDate = document.getElementById('log-date').value;
     const sessionType = document.getElementById('session-type').value;
     let sessionName = sessionType;
@@ -25,7 +26,7 @@ function renderDailyExercises() {
         const logData = { ...lastValues, ...existingLog };
 
         return `
-            <div class="exercise-card collapsed" data-exercise-id="${exercise.id}">
+            <div class="exercise-card collapsed ${logData.excluded ? 'excluded' : ''}" data-exercise-id="${exercise.id}">
                 <div class="exercise-header">
                     <h3 class="exercise-title">${exercise.name}</h3>
                     <button class="collapse-btn" type="button" aria-label="Toggle exercise details" title="Collapse/expand" aria-expanded="false">▼</button>
@@ -48,7 +49,7 @@ function renderDailyExercises() {
                         return `
                         <div class="session-item">
                             <span class="session-name">${sessionName}</span>
-                            <span class="session-status">${exerciseData.completed ? '<span class="status-complete">Done</span>' : '<span class="status-pending">Pending</span>'}</span>
+                            <span class="session-status">${exerciseData.excluded ? '<span class="status-skipped">Skipped</span>' : (exerciseData.completed ? '<span class="status-complete">Done</span>' : '<span class="status-pending">Pending</span>')}</span>
                             ${exerciseData.reps ? `<span class="session-reps">${exerciseData.reps} reps</span>` : ''}
                             ${exerciseData.timestamp ? `<span class="session-time">${new Date(exerciseData.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>` : ''}
                         </div>
@@ -69,32 +70,37 @@ function renderDailyExercises() {
                     ` : ''}
 
                     <div class="completion-checkbox">
-                        <input type="checkbox" id="completed-${exercise.id}" ${logData.completed ? 'checked' : ''}>
+                        <input type="checkbox" id="completed-${exercise.id}" ${logData.completed ? 'checked' : ''} ${logData.excluded ? 'disabled' : ''}>
                         <label for="completed-${exercise.id}">Completed</label>
+                    </div>
+
+                    <div class="skip-checkbox" title="Skip this exercise in this session">
+                        <input type="checkbox" id="excluded-${exercise.id}" ${logData.excluded ? 'checked' : ''}>
+                        <label for="excluded-${exercise.id}">Skip this session</label>
                     </div>
 
                     <div class="tracking-row">
                         <div class="tracking-group">
                             <label>Reps Completed:</label>
-                            <input type="number" id="reps-${exercise.id}" value="${logData.reps || ''}" placeholder="Actual reps done">
+                            <input type="number" id="reps-${exercise.id}" value="${logData.reps || ''}" placeholder="Actual reps done" ${logData.excluded ? 'disabled' : ''}>
                         </div>
                         <div class="tracking-group">
                             <label>Weight Used (lbs):</label>
-                            <input type="number" id="weight-${exercise.id}" value="${logData.weight || ''}" placeholder="Weight if applicable">
+                            <input type="number" id="weight-${exercise.id}" value="${logData.weight || ''}" placeholder="Weight if applicable" ${logData.excluded ? 'disabled' : ''}>
                         </div>
                         <div class="tracking-group">
                             <label>Pain Level (1-10):</label>
-                            <input type="number" id="pain-${exercise.id}" value="${logData.pain || ''}" min="1" max="10" placeholder="1-10">
+                            <input type="number" id="pain-${exercise.id}" value="${logData.pain || ''}" min="1" max="10" placeholder="1-10" ${logData.excluded ? 'disabled' : ''}>
                         </div>
                         <div class="tracking-group">
                             <label>Difficulty (1-10):</label>
-                            <input type="number" id="difficulty-${exercise.id}" value="${logData.difficulty || ''}" min="1" max="10" placeholder="1-10">
+                            <input type="number" id="difficulty-${exercise.id}" value="${logData.difficulty || ''}" min="1" max="10" placeholder="1-10" ${logData.excluded ? 'disabled' : ''}>
                         </div>
                     </div>
 
                     <div class="tracking-group">
                         <label>Notes:</label>
-                        <textarea id="notes-${exercise.id}" rows="2" placeholder="How did it feel? Any modifications?">${logData.notes || ''}</textarea>
+                        <textarea id="notes-${exercise.id}" rows="2" placeholder="How did it feel? Any modifications?" ${logData.excluded ? 'disabled' : ''}>${logData.notes || ''}</textarea>
                     </div>
                 </div>
             </div>
@@ -114,6 +120,7 @@ function getLastExerciseValues(exerciseId) {
         for (const sessionName of Object.keys(sessions)) {
             const exerciseData = sessions[sessionName]?.[exerciseId];
             if (!exerciseData) continue;
+            if (exerciseData.excluded) continue;
             const hasValues = exerciseData.reps != null ||
                 exerciseData.weight != null ||
                 exerciseData.pain != null ||
@@ -210,6 +217,27 @@ function saveDayProgress() {
     const timestamp = new Date().toISOString();
 
     exercises.forEach(exercise => {
+        const excludedEl = document.getElementById(`excluded-${exercise.id}`);
+        if (excludedEl && excludedEl.checked) {
+            const existingLog = dailyLogs[selectedDate]?.sessions?.[sessionName]?.[exercise.id] || {};
+            dailyLogs[selectedDate].sessions[sessionName][exercise.id] = {
+                ...existingLog,
+                excluded: true,
+                completed: false,
+                timestamp,
+                exerciseSnapshot: existingLog.exerciseSnapshot || {
+                    id: exercise.id,
+                    name: exercise.name,
+                    description: exercise.description,
+                    reps: exercise.reps,
+                    hold: exercise.hold,
+                    frequency: exercise.frequency,
+                    weight: exercise.weight,
+                    version: exercise.metadata?.version || 1
+                }
+            };
+            return;
+        }
         if (!document.getElementById(`completed-${exercise.id}`)) return;
         const completed = document.getElementById(`completed-${exercise.id}`).checked;
         const reps = document.getElementById(`reps-${exercise.id}`).value;
@@ -220,6 +248,7 @@ function saveDayProgress() {
 
         dailyLogs[selectedDate].sessions[sessionName][exercise.id] = {
             completed,
+            excluded: false,
             reps: reps ? parseInt(reps) : null,
             weight: weight ? parseFloat(weight) : null,
             pain: pain ? parseInt(pain) : null,
@@ -242,6 +271,40 @@ function saveDayProgress() {
     saveDailyLogs();
     alert(`Progress saved for ${sessionName} session!`);
     updateProgress();
+}
+
+function updateSessionOptions() {
+    const select = document.getElementById('session-type');
+    if (!select) return;
+    const selectedDate = document.getElementById('log-date')?.value;
+    const existingSessions = dailyLogs[selectedDate]?.sessions ? Object.keys(dailyLogs[selectedDate].sessions) : [];
+    const defaultOptions = new Set(['morning', 'afternoon', 'evening', 'custom']);
+
+    // Remove session options that belong to other dates
+    Array.from(select.options).forEach(option => {
+        if (!defaultOptions.has(option.value)) {
+            select.removeChild(option);
+        }
+    });
+
+    const existingOptions = new Set(Array.from(select.options).map(o => o.value));
+    existingSessions.forEach(sessionName => {
+        if (defaultOptions.has(sessionName) || existingOptions.has(sessionName)) return;
+        const option = document.createElement('option');
+        option.value = sessionName;
+        option.textContent = sessionName;
+        const customOption = select.querySelector('option[value="custom"]');
+        if (customOption) {
+            select.insertBefore(option, customOption);
+        } else {
+            select.appendChild(option);
+        }
+        existingOptions.add(sessionName);
+    });
+
+    if (select.value && !existingOptions.has(select.value)) {
+        select.value = 'morning';
+    }
 }
 
 function setupCollapseListeners() {

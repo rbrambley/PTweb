@@ -49,13 +49,14 @@ function renderCalendar() {
                 // New session-based structure
                 Object.values(dayLog.sessions).forEach(session => {
                     Object.values(session).forEach(exerciseData => {
+                        if (exerciseData.excluded) return;
                         totalExercises++;
                         if (exerciseData.completed) completedExercises++;
                     });
                 });
             } else {
                 // Old data structure for backward compatibility
-                const exerciseEntries = Object.entries(dayLog).filter(([key, log]) => key !== 'sessions' && log && typeof log === 'object');
+                const exerciseEntries = Object.entries(dayLog).filter(([key, log]) => key !== 'sessions' && log && typeof log === 'object' && !log.excluded);
                 totalExercises = exerciseEntries.length;
                 completedExercises = exerciseEntries.filter(([key, log]) => log.completed).length;
             }
@@ -124,6 +125,7 @@ function getCalendarDayTooltip(dateStr) {
                 const exerciseEntries = Object.entries(sessionData);
                 if (exerciseEntries.length === 0) return '';
                 const exerciseList = exerciseEntries.map(([exerciseId, exerciseData]) => {
+                    if (exerciseData.excluded) return '';
                     totalExercises++;
                     if (exerciseData.completed) completedExercises++;
                     const exerciseName = getExerciseName(exerciseData, exerciseId);
@@ -134,8 +136,9 @@ function getCalendarDayTooltip(dateStr) {
             }).join('');
         } else {
             // Old data structure for backward compatibility
-            const exerciseEntries = Object.entries(dayLog);
+            const exerciseEntries = Object.entries(dayLog).filter(([key, log]) => key !== 'sessions' && log && typeof log === 'object');
             sessionsHtml = exerciseEntries.map(([exerciseId, log]) => {
+                if (log.excluded) return '';
                 totalExercises++;
                 if (log.completed) completedExercises++;
                 const exerciseName = getExerciseName(log, exerciseId);
@@ -220,12 +223,13 @@ function updateCalendarMonthStats(year, month) {
         if (dayLog.sessions && Object.keys(dayLog.sessions).length > 0) {
             Object.values(dayLog.sessions).forEach(session => {
                 Object.values(session).forEach(exerciseData => {
+                    if (exerciseData.excluded) return;
                     dayTotal++;
                     if (exerciseData.completed) dayCompleted++;
                 });
             });
         } else {
-            const exerciseEntries = Object.entries(dayLog).filter(([key, log]) => key !== 'sessions' && log && typeof log === 'object');
+            const exerciseEntries = Object.entries(dayLog).filter(([key, log]) => key !== 'sessions' && log && typeof log === 'object' && !log.excluded);
             dayTotal = exerciseEntries.length;
             dayCompleted = exerciseEntries.filter(([key, log]) => log.completed).length;
         }
@@ -296,15 +300,17 @@ function openCalendarDayModal(dateStr) {
                 const exerciseEntries = Object.entries(sessionData);
                 if (exerciseEntries.length === 0) return '';
                 const exerciseList = exerciseEntries.map(([exerciseId, exerciseData]) => {
-                    totalExercises++;
-                    if (exerciseData.completed) completedExercises++;
                     const exerciseName = getExerciseName(exerciseData, exerciseId);
-                    const statusIcon = exerciseData.completed ? '<span class="status-complete">Done</span>' : '<span class="status-pending">Pending</span>';
+                    const statusIcon = exerciseData.excluded ? '<span class="status-skipped">Skipped</span>' : (exerciseData.completed ? '<span class="status-complete">Done</span>' : '<span class="status-pending">Pending</span>');
                     const metaParts = [];
-                    if (exerciseData.reps) metaParts.push(`${exerciseData.reps} reps`);
-                    if (exerciseData.weight) metaParts.push(`${exerciseData.weight}`);
-                    if (exerciseData.timestamp) {
-                        metaParts.push(new Date(exerciseData.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+                    if (!exerciseData.excluded) {
+                        totalExercises++;
+                        if (exerciseData.completed) completedExercises++;
+                        if (exerciseData.reps) metaParts.push(`${exerciseData.reps} reps`);
+                        if (exerciseData.weight) metaParts.push(`${exerciseData.weight}`);
+                        if (exerciseData.timestamp) {
+                            metaParts.push(new Date(exerciseData.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+                        }
                     }
                     const meta = metaParts.length > 0 ? `<span class="day-detail-exercise-meta">${escapeHtml(metaParts.join(' • '))}</span>` : '';
                     return `
@@ -323,12 +329,14 @@ function openCalendarDayModal(dateStr) {
                 `;
             }).join('');
         } else {
-            const exerciseEntries = Object.entries(dayLog);
+            const exerciseEntries = Object.entries(dayLog).filter(([key, log]) => key !== 'sessions' && log && typeof log === 'object');
             sessionsHtml = exerciseEntries.map(([exerciseId, log]) => {
-                totalExercises++;
-                if (log.completed) completedExercises++;
                 const exerciseName = getExerciseName(log, exerciseId);
-                const statusIcon = log.completed ? '<span class="status-complete">Done</span>' : '<span class="status-pending">Pending</span>';
+                const statusIcon = log.excluded ? '<span class="status-skipped">Skipped</span>' : (log.completed ? '<span class="status-complete">Done</span>' : '<span class="status-pending">Pending</span>');
+                if (!log.excluded) {
+                    totalExercises++;
+                    if (log.completed) completedExercises++;
+                }
                 return `
                     <div class="day-detail-exercise">
                         <span class="day-detail-exercise-status">${statusIcon}</span>

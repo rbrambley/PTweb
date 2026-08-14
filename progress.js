@@ -87,6 +87,7 @@ function updateProgress() {
             // New session-based structure
             Object.values(dayLog.sessions).forEach(session => {
                 Object.values(session).forEach(log => {
+                    if (log.excluded) return;
                     totalPossible++;
                     if (log.completed) {
                         totalCompleted++;
@@ -96,6 +97,7 @@ function updateProgress() {
         } else {
             // Old data structure for backward compatibility
             Object.values(dayLog).forEach(log => {
+                if (log.excluded) return;
                 totalPossible++;
                 if (log.completed) {
                     totalCompleted++;
@@ -145,13 +147,14 @@ function renderHistory(dates) {
         if (dayLog.sessions && Object.keys(dayLog.sessions).length > 0) {
             Object.values(dayLog.sessions).forEach(session => {
                 Object.values(session).forEach(log => {
+                    if (log.excluded) return;
                     totalExercises++;
                     if (log.completed) completedExercises++;
                 });
             });
         } else {
             // Old data structure for backward compatibility
-            const exerciseEntries = Object.entries(dayLog).filter(([key, log]) => key !== 'sessions' && log && typeof log === 'object');
+            const exerciseEntries = Object.entries(dayLog).filter(([key, log]) => key !== 'sessions' && log && typeof log === 'object' && !log.excluded);
             totalExercises = exerciseEntries.length;
             completedExercises = exerciseEntries.filter(([key, log]) => log.completed).length;
         }
@@ -200,14 +203,16 @@ function updateCompletionChart(dates) {
         if (dayLog.sessions && Object.keys(dayLog.sessions).length > 0) {
             Object.values(dayLog.sessions).forEach(session => {
                 Object.values(session).forEach(log => {
+                    if (log.excluded) return;
                     total++;
                     if (log.completed) completed++;
                 });
             });
         } else {
             // Old data structure for backward compatibility
-            total = Object.keys(dayLog).length;
-            completed = Object.values(dayLog).filter(log => log.completed).length;
+            const exerciseEntries = Object.entries(dayLog).filter(([key, log]) => key !== 'sessions' && log && typeof log === 'object' && !log.excluded);
+            total = exerciseEntries.length;
+            completed = exerciseEntries.filter(([key, log]) => log.completed).length;
         }
 
         return total > 0 ? Math.round((completed / total) * 100) : 0;

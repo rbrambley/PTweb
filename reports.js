@@ -110,6 +110,7 @@ function generateReport() {
             textLines.push(`  ${sessionName}`);
 
             exerciseEntries.forEach(([exerciseId, log]) => {
+                if (log.excluded) return;
                 totalExercises++;
                 if (log.completed) {
                     completedExercises++;
@@ -148,7 +149,7 @@ function generateReport() {
                 textLines.push(`    ${statusText} ${name}${textDetail}${time ? ` @ ${time}` : ''}`);
             });
 
-            const sessionTotal = exerciseEntries.length;
+            const sessionTotal = exerciseEntries.filter(([_, log]) => !log.excluded).length;
             const sessionRate = sessionTotal > 0 ? Math.round((sessionCompleted / sessionTotal) * 100) : 0;
 
             dayHtml.push(`
