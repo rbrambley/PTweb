@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#667eea">
+    <title>PT Exercise Tracker - Disc Golf Recovery</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <svg xmlns="http://www.w3.org/2000/svg" style="position: absolute; width: 0; height: 0; overflow: hidden;" aria-hidden="true">
+        <symbol id="icon-daily" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 6L9 17l-5-5"></path>
+        </symbol>
+        <symbol id="icon-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="5" width="18" height="16" rx="2"></rect>
+            <path d="M3 10h18M8 3v4M16 3v4"></path>
+        </symbol>
+        <symbol id="icon-progress" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 18l6-6 4 4 8-10"></path>
+        </symbol>
+        <symbol id="icon-milestones" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4v16"></path>
+            <path d="M4 4h13l-5 5 5 5H4"></path>
+        </symbol>
+        <symbol id="icon-exercises" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7 7h2v10H7zM15 7h2v10h-2zM4 10h16v4H4z"></path>
+        </symbol>
+        <symbol id="icon-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M12 1v3m0 16v3M4.2 4.2l2.1 2.1m11.4 11.4l2.1 2.1M1 12h3m16 0h3M4.2 19.8l2.1-2.1m11.4-11.4l2.1-2.1"></path>
+        </symbol>
+        <symbol id="icon-flowsheet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path>
+            <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"></path>
+        </symbol>
+    </svg>
+
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1>🥏 Disc Golf PT Tracker</h1>
+                <div class="theme-selector">
+                    <button class="theme-btn" data-theme="light" title="Light mode">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="5"></circle>
+                            <line x1="12" y1="1" x2="12" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="23"></line>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                            <line x1="1" y1="12" x2="3" y2="12"></line>
+                            <line x1="21" y1="12" x2="23" y2="12"></line>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                        </svg>
+                    </button>
+                    <button class="theme-btn" data-theme="dark" title="Dark mode">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                    </button>
+                    <button class="theme-btn" data-theme="system" title="System theme">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                            <line x1="8" y1="21" x2="16" y2="21"></line>
+                            <line x1="12" y1="17" x2="12" y2="21"></line>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="countdown">
+                <span class="countdown-label">Target: <span id="target-label">September 1, 2026</span></span>
+                <span class="countdown-timer" id="countdown">6 weeks remaining</span>
+            </div>
+            
+            <div class="streak-indicator" id="streak-indicator">
+                <span class="streak-fire" id="streak-fire">🔥</span>
+                <span class="streak-count" id="streak-count">0</span>
+                <span class="streak-label" id="streak-label">day streak</span>
+            </div>
+        </header>
+
+        <nav class="tabs" role="tablist" aria-label="App sections">
+            <button class="tab active" data-tab="daily" role="tab" aria-selected="true" aria-label="Daily Log">
+                <svg class="tab-icon" aria-hidden="true"><use href="#icon-daily"></use></svg>
+                <span class="tab-text">Daily</span>
+            </button>
+            <button class="tab" data-tab="calendar" role="tab" aria-selected="false" aria-label="Calendar">
+                <svg class="tab-icon" aria-hidden="true"><use href="#icon-calendar"></use></svg>
+                <span class="tab-text">Calendar</span>
+            </button>
+            <button class="tab" data-tab="progress" role="tab" aria-selected="false" aria-label="Progress">
+                <svg class="tab-icon" aria-hidden="true"><use href="#icon-progress"></use></svg>
+                <span class="tab-text">Progress</span>
+            </button>
+            <button class="tab" data-tab="milestones" role="tab" aria-selected="false" aria-label="Return to Play">
+                <svg class="tab-icon" aria-hidden="true"><use href="#icon-milestones"></use></svg>
+                <span class="tab-text">Milestones</span>
+            </button>
+            <button class="tab" data-tab="exercises" role="tab" aria-selected="false" aria-label="Manage Exercises">
+                <svg class="tab-icon" aria-hidden="true"><use href="#icon-exercises"></use></svg>
+                <span class="tab-text">Exercises</span>
+            </button>
+            <button class="tab" data-tab="settings" role="tab" aria-selected="false" aria-label="Settings">
+                <svg class="tab-icon" aria-hidden="true"><use href="#icon-settings"></use></svg>
+                <span class="tab-text">Settings</span>
+            </button>
+            <button class="tab" data-tab="flowsheet" role="tab" aria-selected="false" aria-label="Flowsheet">
+                <svg class="tab-icon" aria-hidden="true"><use href="#icon-flowsheet"></use></svg>
+                <span class="tab-text">Flowsheet</span>
+            </button>
+        </nav>
+
+        <main>
+            <!-- Daily Log Tab -->
+            <section id="daily-tab" class="tab-content active">
+                <div class="date-selector">
+                    <label for="log-date">Date:</label>
+                    <input type="date" id="log-date">
+                    <button class="btn btn-secondary" id="go-today">Today</button>
+                </div>
+
+                <div class="session-selector">
+                    <label for="session-type">Session:</label>
+                    <select id="session-type">
+                        <option value="morning">Morning</option>
+                        <option value="afternoon">Afternoon</option>
+                        <option value="evening">Evening</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                    <input type="text" id="custom-session-name" placeholder="Session name" class="hidden">
+                </div>
+
+                <div class="exercise-card swelling-panel collapsed">
+                    <div class="exercise-header">
+                        <h3 class="exercise-title">Swelling Check-In</h3>
+                        <button class="collapse-btn" type="button" aria-label="Toggle swelling section" title="Collapse/expand" aria-expanded="false">▼</button>
+                    </div>
+                    <p class="exercise-description">Log swelling once per day (e.g. in the morning before activity) to spot trends early.</p>
+                    <div class="tracking-row">
+                        <div class="tracking-group">
+                            <label for="swelling-level">Swelling Level (0-10):</label>
+                            <input type="number" id="swelling-level" min="0" max="10" placeholder="0 = none, 10 = severe">
+                        </div>
+                        <div class="tracking-group">
+                            <label for="swelling-location">Location:</label>
+                            <input type="text" id="swelling-location" placeholder="e.g. Left knee, ankle">
+                        </div>
+                        <div class="tracking-group">
+                            <label for="swelling-circumference">Circumference (in):</label>
+                            <input type="number" step="0.1" id="swelling-circumference" placeholder="Optional measurement">
+                        </div>
+                        <div class="tracking-group">
+                            <label for="swelling-time">Time of Day:</label>
+                            <select id="swelling-time">
+                                <option value="morning">Morning</option>
+                                <option value="afternoon">Afternoon</option>
+                                <option value="evening">Evening</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="tracking-group">
+                        <label for="swelling-notes">Notes:</label>
+                        <textarea id="swelling-notes" rows="2" placeholder="Warmth, redness, pitting, comparison to yesterday, etc."></textarea>
+                    </div>
+                    <button class="btn btn-secondary" id="save-swelling">Save Swelling Log</button>
+                </div>
+
+                <div class="exercise-list" id="daily-exercises">
+                    <!-- Exercises will be populated here -->
+                </div>
+
+                <button class="btn btn-primary" id="save-day">Save Session Progress</button>
+            </section>
+
+            <!-- Calendar Tab -->
+            <section id="calendar-tab" class="tab-content">
+                <h2>Exercise Calendar</h2>
+                <div class="calendar-controls">
+                    <button class="btn btn-secondary" id="prev-month">&lt; Previous</button>
+                    <div class="calendar-month-group">
+                        <span class="calendar-month" id="calendar-month-label">July 2026</span>
+                        <button class="btn btn-text" id="today-month" title="Jump to today">Today</button>
+                    </div>
+                    <button class="btn btn-secondary" id="next-month">Next &gt;</button>
+                </div>
+                <div class="calendar-grid" id="calendar-grid">
+                    <!-- Calendar will be populated here -->
+                </div>
+                <div class="calendar-legend">
+                    <div class="legend-item"><span class="legend-marker today"></span> Today</div>
+                    <div class="legend-item"><span class="legend-marker complete"></span> Complete</div>
+                    <div class="legend-item"><span class="legend-marker partial"></span> Partial</div>
+                    <div class="legend-item"><span class="legend-marker no-data"></span> No data</div>
+                </div>
+                <div class="calendar-month-stats" id="calendar-month-stats">
+                    <div class="month-stat">
+                        <span class="month-stat-value" id="month-stat-days">0</span>
+                        <span class="month-stat-label">Days Logged</span>
+                    </div>
+                    <div class="month-stat">
+                        <span class="month-stat-value" id="month-stat-exercises">0</span>
+                        <span class="month-stat-label">Exercises Done</span>
+                    </div>
+                    <div class="month-stat">
+                        <span class="month-stat-value" id="month-stat-rate">0%</span>
+                        <span class="month-stat-label">Completion</span>
+                    </div>
+                    <div class="month-stat">
+                        <span class="month-stat-value" id="month-stat-streak">0</span>
+                        <span class="month-stat-label">Current Streak</span>
+                    </div>
+                </div>
+                <div class="calendar-tooltip" id="calendar-tooltip" role="tooltip" aria-hidden="true"></div>
+            </section>
+
+            <!-- Progress Tab -->
+            <section id="progress-tab" class="tab-content">
+                <h2>Overall Progress</h2>
+                <div class="progress-summary">
+                    <div class="stat-card">
+                        <h3>Total Days Completed</h3>
+                        <p class="stat-value" id="total-days">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Current Streak</h3>
+                        <p class="stat-value" id="current-streak">0 days</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Completion Rate</h3>
+                        <p class="stat-value" id="completion-rate">0%</p>
+                    </div>
+                </div>
+                
+                <div class="report-action">
+                    <button class="btn btn-primary" id="generate-report">Generate Report</button>
+                    <button class="btn btn-secondary" id="weekly-report">Weekly Report</button>
+                </div>
+                
+                <h3>Weekly Goals</h3>
+                <div class="weekly-goals">
+                    <div class="goal-item">
+                        <div class="goal-header">
+                            <span class="goal-label">Weekly Exercise Target</span>
+                            <span class="goal-progress" id="weekly-progress">0/7 days</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="weekly-progress-bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="goal-item">
+                        <div class="goal-header">
+                            <span class="goal-label">Weekly Completion Rate Goal</span>
+                            <span class="goal-progress" id="weekly-rate-progress">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="weekly-rate-bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Weekly Progress</h3>
+                <div class="weekly-chart">
+                    <canvas id="completionChart"></canvas>
+                </div>
+                
+                <h3>Pain Trends</h3>
+                <div class="weekly-chart">
+                    <canvas id="painChart"></canvas>
+                </div>
+                
+                <h3>Difficulty Trends</h3>
+                <div class="weekly-chart">
+                    <canvas id="difficultyChart"></canvas>
+                </div>
+
+                <h3>Swelling Trends</h3>
+                <div class="weekly-chart">
+                    <canvas id="swellingChart"></canvas>
+                </div>
+
+                <h3>Exercise History</h3>
+                <div class="history-list" id="exercise-history">
+                    <!-- Exercise history will be populated here -->
+                </div>
+                
+                <h3>Achievement Badges</h3>
+                <div class="badges-container" id="badges-container">
+                    <!-- Badges will be populated here -->
+                </div>
+            </section>
+
+            <!-- Return to Play Milestones Tab -->
+            <section id="milestones-tab" class="tab-content">
+                <h2>Return to Play Milestones</h2>
+
+                <div class="milestone-summary">
+                    <div class="milestone-overall-header">
+                        <span>Overall Progress</span>
+                        <span id="milestone-overall-count">0 / 0 complete</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="milestone-overall-bar" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="next-up-card hidden" id="next-up-card">
+                    <div class="next-up-label">🎯 Next Up</div>
+                    <div class="next-up-text" id="next-up-text"></div>
+                </div>
+
+                <div class="milestone-timeline" id="milestone-timeline">
+                    <!-- Milestone phases/timeline will be populated here -->
+                </div>
+            </section>
+
+            <!-- Manage Exercises Tab -->
+            <section id="exercises-tab" class="tab-content">
+                <h2>Current Exercises</h2>
+                <div class="exercise-list" id="manage-exercises">
+                    <!-- Exercise management will be populated here -->
+                </div>
+
+                <button class="btn btn-secondary" id="add-exercise">Add New Exercise</button>
+            </section>
+
+            <!-- Settings Tab -->
+            <section id="settings-tab" class="tab-content">
+                <h2>Settings</h2>
+                
+                <div class="settings-section">
+                    <h3>Reminders</h3>
+                    <div class="setting-item">
+                        <label for="reminder-time">Daily Reminder Time:</label>
+                        <input type="time" id="reminder-time" value="09:00">
+                        <button class="btn btn-primary" id="enable-reminders">Enable Reminders</button>
+                        <button class="btn btn-danger hidden" id="disable-reminders">Disable Reminders</button>
+                    </div>
+                    <p class="setting-description">Get browser notifications to remind you to do your exercises</p>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Recovery Target</h3>
+                    <div class="setting-item">
+                        <label for="target-date">Target date:</label>
+                        <input type="date" id="target-date">
+                        <button class="btn btn-primary" id="save-target-date">Save Target</button>
+                    </div>
+                    <p class="setting-description">Set the recovery target date shown in the countdown</p>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>Data Management</h3>
+                    <div class="setting-item">
+                        <button class="btn btn-secondary" id="export-data">Export Data</button>
+                        <button class="btn btn-secondary" id="import-data">Import Data</button>
+                        <input type="file" id="import-file" accept=".json" class="hidden">
+                    </div>
+                    <p class="setting-description">Export your data to backup or import from a previous backup</p>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Test Mode</h3>
+                    <div class="setting-item">
+                        <button class="btn btn-secondary" id="toggle-test-mode">Enable Test Mode</button>
+                        <button class="btn btn-danger hidden" id="clear-test-data">Clear Test Data</button>
+                    </div>
+                    <p class="setting-description">Test mode uses mock data and separate storage to test changes without affecting your real data</p>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>Danger Zone</h3>
+                    <div class="setting-item">
+                        <button class="btn btn-danger" id="clear-all-data">Clear All Data</button>
+                    </div>
+                    <p class="setting-description">Permanently delete all your exercise data (cannot be undone)</p>
+                </div>
+            </section>
+
+            <!-- Flowsheet Tab -->
+            <section id="flowsheet-tab" class="tab-content">
+                <h2>PT Flowsheet</h2>
+                <p class="setting-description">Upload your PT prescription PDF for reference. The file stays on this device and is not sent anywhere.</p>
+                <div class="flowsheet-upload">
+                    <input type="file" id="flowsheet-file" accept="application/pdf" aria-label="Upload PT flowsheet PDF">
+                </div>
+                <div class="pdf-viewer">
+                    <embed id="flowsheet-embed" type="application/pdf" width="100%" height="100%" title="PT flowsheet PDF" />
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Exercise Modal -->
+    <div id="exercise-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modal-title">Add Exercise</h2>
+            <form id="exercise-form">
+                <div class="form-group">
+                    <label for="exercise-name">Exercise Name:</label>
+                    <input type="text" id="exercise-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="exercise-description">Description/How-to:</label>
+                    <textarea id="exercise-description" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="exercise-reps">Prescribed Reps:</label>
+                    <input type="number" id="exercise-reps" placeholder="e.g., 20">
+                </div>
+                <div class="form-group">
+                    <label for="exercise-hold">Hold Time:</label>
+                    <input type="text" id="exercise-hold" placeholder="e.g., 3-5 seconds">
+                </div>
+                <div class="form-group">
+                    <label for="exercise-frequency">Daily Frequency:</label>
+                    <input type="text" id="exercise-frequency" placeholder="e.g., 2-3 times per day">
+                </div>
+                <div class="form-group">
+                    <label for="exercise-weight">Ankle Weight (optional):</label>
+                    <input type="text" id="exercise-weight" placeholder="e.g., 3-5 lbs">
+                </div>
+                <button type="submit" class="btn btn-primary">Save Exercise</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Report Modal -->
+    <div id="report-modal" class="modal">
+        <div class="modal-content report-modal-content">
+            <span class="close">&times;</span>
+            <h2>Generate Exercise Report</h2>
+            <form id="report-form">
+                <div class="form-group">
+                    <label for="report-start-date">Start Date:</label>
+                    <input type="date" id="report-start-date">
+                </div>
+                <div class="form-group">
+                    <label for="report-end-date">End Date:</label>
+                    <input type="date" id="report-end-date">
+                </div>
+                <div class="form-group">
+                    <label for="report-session-filter">Session Filter:</label>
+                    <select id="report-session-filter">
+                        <option value="all">All Sessions</option>
+                        <option value="morning">Morning</option>
+                        <option value="afternoon">Afternoon</option>
+                        <option value="evening">Evening</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                </div>
+                <div class="form-group report-options">
+                    <label>Include in Report:</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" id="report-include-summary" checked> Summary statistics</label>
+                        <label><input type="checkbox" id="report-include-notes" checked> Exercise notes</label>
+                        <label><input type="checkbox" id="report-include-pain" checked> Pain levels</label>
+                        <label><input type="checkbox" id="report-include-difficulty" checked> Difficulty ratings</label>
+                        <label><input type="checkbox" id="report-include-swelling" checked> Swelling logs</label>
+                        <label><input type="checkbox" id="report-include-timestamps" checked> Timestamps</label>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Generate Report</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Calendar Day Detail Modal -->
+    <div id="day-detail-modal" class="modal">
+        <div class="modal-content day-detail-modal-content">
+            <span class="close" id="close-day-detail">&times;</span>
+            <h2 id="day-detail-title">Day Detail</h2>
+            <div id="day-detail-body">
+                <!-- Day details populated here -->
+            </div>
+            <div class="day-detail-actions">
+                <button class="btn btn-primary" id="day-detail-edit">Edit in Daily Log</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="utils.js"></script>
+    <script src="storage.js"></script>
+    <script src="state.js"></script>
+    <script src="countdown.js"></script>
+    <script src="settings.js"></script>
+    <script src="exercises.js"></script>
+    <script src="milestones.js"></script>
+    <script src="progress.js"></script>
+    <script src="daily.js"></script>
+    <script src="app.js"></script>
+    <script src="reports.js"></script>
+    <script src="calendar.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js?pt-tracker-v30', { updateViaCache: 'none' })
+                .then(reg => {
+                    console.log('Service worker registered');
+
+                    reg.addEventListener('updatefound', () => {
+                        const newWorker = reg.installing;
+                        if (!newWorker) return;
+
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'activated' && navigator.serviceWorker.controller) {
+                                if (confirm('A new version of PT Tracker is available. Refresh to update?')) {
+                                    window.location.reload();
+                                }
+                            }
+                        });
+                    });
+                })
+                .catch(err => console.log('Service worker registration failed', err));
+        }
+    </script>
+</body>
+</html>
