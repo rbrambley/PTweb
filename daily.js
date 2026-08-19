@@ -15,12 +15,11 @@ function renderDailyExercises() {
     const today = formatDateInput(new Date());
     const isPast = selectedDate < today;
 
-    // For past dates, only show exercises that were actually logged in this
-    // session (active or not). For today, show all active exercises.
+    // Show all active exercises for any date, and keep exercises already
+    // logged in this session even if they have since been inactivated.
     const activeExercises = exercises.filter(ex => {
         const isLoggedInSession = !!dailyLogs[selectedDate]?.sessions?.[sessionName]?.[ex.id];
-        if (isPast) return isLoggedInSession;
-        return ex.metadata?.isActive !== false;
+        return isLoggedInSession || ex.metadata?.isActive !== false;
     });
 
     if (activeExercises.length === 0) {
